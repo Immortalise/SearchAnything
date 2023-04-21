@@ -15,8 +15,9 @@ def init_index(dim=1024):
     return index
 
 
-def add_index(index, embedding_matrix):
-    index.add(embedding_matrix)
+def insert_index(index, line_list):
+    embeddings = np.vstack([item['embedding'] for item in line_list])  
+    index.add(embeddings)
     faiss.write_index(index, INDEX_PATH)
     return index
 

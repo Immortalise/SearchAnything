@@ -25,15 +25,17 @@ def init_db():
     return conn
 
 
-def insert_data(conn, file_data):
-
+def insert_data(conn, data):
     c = conn.cursor()
-    for file in file_data:
-        c.execute('''
-        INSERT INTO file_data (title, content, embedding)
-        VALUES (?, ?, ?)
-        ''', (file['title'], file['content'], file['embedding'].tobytes()))
-    conn.commit()
+
+    columns = ', '.join(data.keys())
+    placeholders = ', '.join(['?' for _ in data])
+    values = tuple(data.values())
+  
+    query = f'INSERT INTO example_data ({columns}) VALUES ({placeholders})'
+    c.execute(query, values)
+  
+    conn.commit()  
 
 
 def retrieve_data(conn, indices, distances, k=5):

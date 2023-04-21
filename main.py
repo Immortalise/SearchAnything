@@ -3,8 +3,8 @@ import torch
 from model import create_model
 from data import init_db, insert_data, retrieve_data
 from utils import encode_text
-from process import process_pdf
-from index import init_index, add_index, search_index
+from process import process_file
+from index import init_index, insert_index, search_index
 
 def run():
     tokenizer, model = create_model(model_name='google/flan-t5-large')
@@ -23,7 +23,10 @@ def run():
 
         elif input_text == "insert":
             path = input("File path: ")
-            process_pdf(path)
+            line_list = process_file(path)
+            insert_data(db_conn, line_list)
+            insert_index(index, line_list)
+
 
         elif input_text == "search":
             input_embedding = encode_text(tokenizer, model, input_text)
