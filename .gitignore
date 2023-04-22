@@ -1,6 +1,7 @@
 # custumized by me
 *.db
 *.index
+*.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
