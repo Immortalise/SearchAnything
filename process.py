@@ -1,12 +1,72 @@
 from pypdf import PdfReader
+import markdown  
+from bs4 import BeautifulSoup 
+
 from utils import encode_text
 
 
-def process_file(file_path, tokenizer, model):
-    if file_path.endswith(".pdf"):
+def process_file(file_path, file_type, tokenizer, model):
+    if file_type == "pdf":
         return process_pdf(file_path, tokenizer, model)
+    elif file_type == "md":
+        return process_markdown(file_path, tokenizer, model)
+    elif file_type == "txt":
+        return process_text(file_path, tokenizer, model)
     else:
         print("File type not supported.")
+
+
+def process_text(txt_file_path, tokenizer, model):  
+    line_list = []  
+  
+    with open(txt_file_path, 'r', encoding='utf-8') as txt_file:  
+        lines = txt_file.readlines()  
+  
+    for line_num, line in enumerate(lines):  
+        print(line.strip())  
+  
+        file_dict = {}  
+        file_dict['title'] = None  # Text files don't have built-in metadata like PDFs  
+        file_dict['author'] = None  
+        file_dict['page'] = None  
+        file_dict['content'] = line.strip()  
+        file_dict['embedding'] = encode_text(tokenizer, model, line.strip())  
+        file_dict['file_path'] = txt_file_path  
+        file_dict['subject'] = None  
+  
+        line_list.append(file_dict)  
+  
+    return line_list  
+
+  
+def process_markdown(md_file_path, tokenizer, model):  
+    line_list = []  
+  
+    with open(md_file_path, 'r', encoding='utf-8') as md_file:  
+        md_content = md_file.read()  
+  
+    html_content = markdown.markdown(md_content)  
+    soup = BeautifulSoup(html_content, 'html.parser')  
+    text = soup.get_text()  
+  
+    # Split text into lines  
+    lines = text.splitlines()  
+  
+    for line_num, line in enumerate(lines):  
+        print(line)  
+  
+        file_dict = {}  
+        file_dict['title'] = None  # Markdown files don't have built-in metadata like PDFs  
+        file_dict['author'] = None  
+        file_dict['page'] = None  
+        file_dict['content'] = line  
+        file_dict['embedding'] = encode_text(tokenizer, model, line)  
+        file_dict['file_path'] = md_file_path  
+        file_dict['subject'] = None  
+  
+        line_list.append(file_dict)  
+  
+    return line_list  
 
 
 def process_pdf(pdf_file_path, tokenizer, model):
