@@ -1,5 +1,20 @@
 import torch
 import os  
+
+
+def filter_subdirectories(directories):  
+    filtered_dirs = set()  
+  
+    for dir1 in directories:  
+        is_subdir = False  
+        for dir2 in directories:  
+            if dir1 != dir2 and os.path.commonpath([dir1, dir2]) == dir2:  
+                is_subdir = True  
+                break  
+        if not is_subdir:  
+            filtered_dirs.add(dir1)  
+  
+    return filtered_dirs  
   
 
 def list_files_with_type(root_path):  
