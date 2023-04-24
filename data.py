@@ -78,6 +78,6 @@ def retrieve_data(conn, indices):
             if name in ['title', 'file_path', 'page', 'author', 'subject']:
                 print(f"{name}: {value}")   
             if name in ['content']:
-                print(f"{name}: {value[:100]}...")
+                print(f"{name}: {value[:300]}...")
         
         print('\n')

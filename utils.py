@@ -1,4 +1,24 @@
 import torch
+import os  
+  
+
+def list_files_with_type(root_path):  
+    result = []  
+  
+    if os.path.isfile(root_path):  
+        file_type = os.path.splitext(root_path)[1][1:]  
+        result.append({"path": root_path, "type": file_type})  
+        return result  
+  
+    for dirpath, _, filenames in os.walk(root_path):  
+        for filename in filenames:  
+            filepath = os.path.join(dirpath, filename)  
+            file_type = os.path.splitext(filepath)[1][1:]  
+            file_info = {"path": filepath, "type": file_type}  
+            result.append(file_info)  
+  
+    return result
+
 
 def encode_text(tokenizer, model, input_text):
 
