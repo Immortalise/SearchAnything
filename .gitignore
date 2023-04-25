@@ -1,7 +1,7 @@
 # custumized by me
 *.db
 *.index
-*.pdf
+# *.pdf
 # files/
 data/
 
