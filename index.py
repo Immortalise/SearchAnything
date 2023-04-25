@@ -2,7 +2,7 @@ import numpy as np
 import faiss
 import os
 
-# from config import INDEX_PATH
+from config import INDEX_PATH
 
 
 class Index(object):
@@ -15,15 +15,20 @@ class Index(object):
             self.index = faiss.IndexIDMap(index_flat_l2)
 
 
-    def insert_index(self, line_list, inserted_ids):  
+    def insert_index(self, line_list, inserted_ids):
+
         embeddings = np.vstack([line['embedding'] for line in line_list])
         inserted_ids_array = np.array(inserted_ids)  
-        self.index.add_with_ids(embeddings, inserted_ids_array)   
+        self.index.add_with_ids(embeddings, inserted_ids_array)  
+
+        # to prevent potential collasping, we choose to save the index for each operation
+        faiss.write_index(self.index, INDEX_PATH)
 
 
     def search_index(self, query_embedding, k=5):
         distances, indices = self.index.search(query_embedding[np.newaxis, :], k)
         return indices, distances
+
   
     def rebuild_index(self, line_list, inserted_ids):
         # for faiss repo, removing index is not supported
@@ -32,6 +37,9 @@ class Index(object):
         index_flat_l2 = faiss.IndexFlatL2(self.dim)  
         self.index = faiss.IndexIDMap(index_flat_l2)
         self.insert_index(line_list, inserted_ids)
+
+        # to prevent potential collasping, we choose to save the index for each operation
+        faiss.write_index(self.index, INDEX_PATH)
 
 
     def close(self):

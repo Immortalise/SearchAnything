@@ -101,7 +101,6 @@ class DataBase(object):
 
     def retrieve_data(self, indices):
         indices = indices.tolist()[0]
-        print(type(indices))
 
         c = self.conn.cursor()
         placeholders = ','.join('?' * len(indices))
