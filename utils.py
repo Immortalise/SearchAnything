@@ -1,5 +1,39 @@
 import torch
-import os  
+import os
+
+
+# def get_directory_state(path):  
+#     directory_state = {}  
+#     for root, dirs, files in os.walk(path):  
+#         for file_name in files:  
+#             file_path = os.path.join(root, file_name)  
+#             directory_state[file_path] = os.path.getmtime(file_path)  
+        
+#         for dir_name in dirs:  
+#             dir_path = os.path.join(root, dir_name)  
+#             directory_state[dir_path] = os.path.getmtime(dir_path)
+
+#     return directory_state  
+
+  
+# def compare_directory_states(old_state, new_state):  
+#     added_items = set(new_state.keys()) - set(old_state.keys())  
+#     deleted_items = set(old_state.keys()) - set(new_state.keys())  
+#     modified_items = {item for item in new_state if item in old_state and new_state[item] != old_state[item]}  
+  
+#     def filter_items(items):  
+#         filtered_items = set()  
+#         for item in items:  
+#             parent_dir = os.path.dirname(item)  
+#             if parent_dir not in items:  
+#                 filtered_items.add(item)  
+#         return filtered_items  
+  
+#     filtered_added_items = filter_items(added_items)  
+#     filtered_deleted_items = filter_items(deleted_items)  
+#     filtered_modified_items = filter_items(modified_items)  
+  
+#     return filtered_added_items, filtered_deleted_items, filtered_modified_items  
 
 
 def filter_subdirectories(directories):  
