@@ -1,50 +1,26 @@
 from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 import pickle
 import os
 
 from config import MONITORED_DIRS_PATH
 from model import create_model
-from data import init_db, insert_data, retrieve_data, get_file_paths
+from database import DataBase
 from utils import encode_text, filter_subdirectories, list_files_with_type
 from process import process_file
-from index import init_index, insert_index, search_index
+from index import Index
 from config import SUPPORTED_FILE_TYPE
 
 
 class FileGPT(object):
     def __init__(self, model_name):
         self.tokenizer, self.model = create_model(model_name)
-        self.index = init_index()
-        self.db_conn = init_db()
+        self.index = Index()
+        self.db = DataBase()
         print("FileGPT v0.1")
         print("Type 'exit' to exit.\nType 'insert' to parse file.\nType 'search' to search file.")
     
-
-    def insert(self, path):
-        file_list = list_files_with_type(path)
-        for file in file_list:
-            file_path = file['path']
-            file_type = file['type']
-            if (file_type in SUPPORTED_FILE_TYPE) and (file_path not in get_file_paths(self.db_conn)):
-                
-                print("Processing file: ", file_path)
-
-                line_list = process_file(file_path, self.tokenizer, self.model)
-                insert_data(self.db_conn, line_list)
-                insert_index(self.index, line_list)
-
     
-    def search(self, input_text):
-        input_embedding = encode_text(self.tokenizer, self.model, input_text)
-        indices, distances = search_index(self.index, input_embedding)
-        return retrieve_data(self.db_conn, indices)
-
-    
-    def close(self):
-        self.db_conn.close()
-        self.file_change_handler.close()
-
-
     def run(self):
         while True:
             input_text = input("Instruction: ")
@@ -66,6 +42,37 @@ class FileGPT(object):
                 print("Invalid instruction.")
 
 
+    def insert(self, path):
+        file_list = list_files_with_type(path)
+        for file in file_list:
+            file_path = file['path']
+            file_type = file['type']
+            if (file_type in SUPPORTED_FILE_TYPE) and (file_path not in self.db.get_existing_file_paths()):
+                
+                print("Processing file: ", file_path)
+
+                line_list = process_file(file_path, self.tokenizer, self.model)
+                inserted_ids = self.db.insert_data(line_list)
+                self.index.insert_index(line_list, inserted_ids)
+
+    
+    def delete(self, path):
+        is_dir = os.path.isdir(path)
+        remaining_embeddings, remaining_ids = self.db.delete_data(path, is_directory=is_dir)
+        self.index.rebuild_index(remaining_embeddings, remaining_ids)
+
+
+    def search(self, input_text):
+        input_embedding = encode_text(self.tokenizer, self.model, input_text)
+        indices, distances = self.index.search_index(self.index, input_embedding)
+        self.db.retrieve_data(indices)
+
+    
+    def close(self):
+        self.db.close()
+        self.index.close()
+
+
 class FileChangeHandler(FileSystemEventHandler):
     def __init__(self, filegpt: FileGPT):
         
@@ -84,7 +91,7 @@ class FileChangeHandler(FileSystemEventHandler):
   
     def on_deleted(self, event):
         print(f"{'Directory' if event.is_directory else 'File'} deleted: {event.src_path}")  
-        # self.filegpt.delete(event.src_path)
+        self.filegpt.delete(event.src_path)
         self.monitored_dirs.remove(event.src_path)
   
     def on_modified(self, event):  
@@ -102,8 +109,18 @@ class FileChangeHandler(FileSystemEventHandler):
 
 
 if __name__ == "__main__":
-    file_gpt = FileGPT("gpt2")
+    event_handler = FileChangeHandler()
+    observer = Observer()
+    
+    for directory in event_handler.monitored_dirs:
+        observer.schedule(event_handler, directory, recursive=True)
+    
+    observer.start()
+    event_handler.close()
+    file_gpt = FileGPT("google/flan-t5-large")
     file_gpt.run()
+    observer.stop()
+    observer.join()
 
 
 

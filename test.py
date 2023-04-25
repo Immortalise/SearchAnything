@@ -3,33 +3,11 @@ import sys
 import time
 from watchdog.observers import Observer
 
-# print(list_files_with_type("./"))
-
-
-
-
-# # Example usage  
-# directories = {"files", "files/pdfs", "files/txt"}  
-  
-  
-# print(filtered_directories) 
-
-
-event_handler = FileChangeHandler()
-# event_handler.monitored_dirs.add("./")
-print(event_handler.monitored_dirs)
-# filtered_directories = event_handler.monitored_dirs
-# observer = Observer()
-  
-# for directory in filtered_directories:
-#     observer.schedule(event_handler, directory, recursive=True)
-  
-# observer.start()
-  
-# try:  
-#     while True:  
-#         time.sleep(1)  
-# except KeyboardInterrupt:  
-#     observer.stop()  
-# observer.join()
-event_handler.close()
+import faiss
+import numpy as np
+xb = np.random.random((10, 128)).astype('float32')
+index = faiss.IndexFlatL2(xb.shape[1]) 
+ids = np.arange(xb.shape[0])
+# index.add_with_ids(xb, ids)  # this will crash, because IndexFlatL2 does not support add_with_ids
+index2 = faiss.IndexIDMap(index)
+index2.add_with_ids(xb, ids) # works, the vectors are stored in the underlying index
