@@ -1,0 +1,8 @@
+technical path1 causality
+3 types：
+scm
+po （stable learning）
+disentangled - causality （bengio）
+
+
+technical path2 finding invariance from invariance
