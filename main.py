@@ -51,7 +51,7 @@ class FileGPT(object):
                 
                 print("Processing file: ", file_path)
 
-                line_list = process_file(file_path, self.tokenizer, self.model)
+                line_list = process_file(file_path, file_type, self.tokenizer, self.model)
                 inserted_ids = self.db.insert_data(line_list)
                 self.index.insert_index(line_list, inserted_ids)
 
@@ -63,8 +63,9 @@ class FileGPT(object):
 
 
     def search(self, input_text):
-        input_embedding = encode_text(self.tokenizer, self.model, input_text)
-        indices, distances = self.index.search_index(self.index, input_embedding)
+        query_embedding = encode_text(self.tokenizer, self.model, input_text)
+        indices, distances = self.index.search_index(query_embedding)
+        print(indices, distances)
         self.db.retrieve_data(indices)
 
     
@@ -109,7 +110,9 @@ class FileChangeHandler(FileSystemEventHandler):
 
 
 if __name__ == "__main__":
-    event_handler = FileChangeHandler()
+    filegpt = FileGPT("google/flan-t5-large")
+
+    event_handler = FileChangeHandler(filegpt)
     observer = Observer()
     
     for directory in event_handler.monitored_dirs:
@@ -117,8 +120,7 @@ if __name__ == "__main__":
     
     observer.start()
     event_handler.close()
-    file_gpt = FileGPT("google/flan-t5-large")
-    file_gpt.run()
+    filegpt.run()
     observer.stop()
     observer.join()
 
