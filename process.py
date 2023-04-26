@@ -93,15 +93,24 @@ def process_pdf(pdf_file_path, tokenizer, model):
 
         if contains_references:
             raw_lines = raw_lines[:raw_lines.index('references')]
+            if raw_lines == "":
+                break
         
         concatenated_string = ' '.join(raw_lines)
-        concatenated_string.replace("- ", "")
+        concatenated_string = concatenated_string.replace("- ", "")
+        words = concatenated_string.split(" ")
 
+        max_length = 100
 
-        lines = concatenated_string.split('\n')
+        lines = [words[i:i+max_length] for i in range(0, len(words), max_length)]
 
         for line in lines:
+            if len(line) < 3:
+                continue
+
+            line = ' '.join(line)
             print(line)
+            print()
 
             file_dict = {}
             file_dict['title'] = pdf_title
