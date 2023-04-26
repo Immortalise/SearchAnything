@@ -114,10 +114,8 @@ class DataBase(object):
             print(f"Result {i+1}:")
 
             for name, value in zip(column_names, row):
-                if name in ['title', 'file_path', 'page', 'author', 'subject']:
-                    print(f"{name}: {value}")   
-                if name in ['content']:
-                    print(f"{name}: {value[:300]}...")
+                if name in ['title', 'file_path', 'page', 'author', 'subject', 'content']:
+                    print(f"{name}: {value}")
             
             print('\n')
 

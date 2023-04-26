@@ -76,12 +76,21 @@ def encode_text(tokenizer, model, input_text):
     # Get hidden states from the model
     with torch.no_grad():
         _, encoder_hidden_states = model(input_ids=input_ids, decoder_input_ids=input_ids)
-    
-    # Access specific hidden states, e.g., last layer's hidden state  
+
+
     last_layer_hidden_state = encoder_hidden_states[-1]
-    embedding = torch.sum(last_layer_hidden_state.squeeze(0), dim=0).detach().numpy()
-    
-    return embedding
+
+    # # Method 1. Sum up the last layer's hidden states and then normalize the result
+    # embedding = torch.sum(last_layer_hidden_state.squeeze(0), dim=0)  
+
+    # Method 2. select the last token's hidden state as the embedding)
+    embedding = last_layer_hidden_state[-1][-1]
+
+
+    embedding_l2 = torch.norm(embedding, p=2).detach().numpy()  
+    embedding = embedding.detach().numpy()  
+    embedding = embedding / embedding_l2  # Store the result in the 'embedding' variable  
+    return embedding 
 
 
 def summarize_text(tokenizer, model, input_text):
