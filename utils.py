@@ -70,26 +70,33 @@ def list_files_with_type(root_path):
 
 
 def encode_text(tokenizer, model, input_text):
+    embedding = model.encode(input_text)
 
-    input_ids = tokenizer.encode(input_text, return_tensors='pt')
+    # input_ids = tokenizer.encode(input_text, return_tensors='pt')
   
-    # Get hidden states from the model
-    with torch.no_grad():
-        _, encoder_hidden_states = model(input_ids=input_ids, decoder_input_ids=input_ids)
+    # # Get hidden states from the model
+    # with torch.no_grad():
+    #     _, encoder_hidden_states = model(input_ids=input_ids, decoder_input_ids=input_ids)
 
 
-    last_layer_hidden_state = encoder_hidden_states[-1]
+    # last_layer_hidden_state = encoder_hidden_states[-1]
 
-    # # Method 1. Sum up the last layer's hidden states and then normalize the result
-    # embedding = torch.sum(last_layer_hidden_state.squeeze(0), dim=0)  
+    # # # Method 1. Sum up the last layer's hidden states and then normalize the result
+    # # embedding = torch.sum(last_layer_hidden_state.squeeze(0), dim=0)  
 
-    # Method 2. select the last token's hidden state as the embedding)
-    embedding = last_layer_hidden_state[-1][-1]
+    # # Method 2. select the last token's hidden state as the embedding)
+    # embedding = last_layer_hidden_state[-1][-1]
 
 
-    embedding_l2 = torch.norm(embedding, p=2).detach().numpy()  
-    embedding = embedding.detach().numpy()  
-    embedding = embedding / embedding_l2  # Store the result in the 'embedding' variable  
+    # embedding_l2 = torch.norm(embedding, p=2).detach().numpy()  
+    # embedding = embedding.detach().numpy()  
+    # embedding = embedding / embedding_l2  # Store the result in the 'embedding' variable  
+
+
+    import numpy as np
+    embedding_l2 = np.linalg.norm(embedding)
+    embedding = embedding / embedding_l2
+
     return embedding 
 
 

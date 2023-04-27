@@ -15,7 +15,7 @@ from config import SUPPORTED_FILE_TYPE
 class FileGPT(object):
     def __init__(self, model_name):
         self.tokenizer, self.model = create_model(model_name)
-        self.index = Index()
+        self.index = Index(dim=768)
         self.db = DataBase()
         print("FileGPT v0.1")
         print("Type 'exit' to exit.\nType 'insert' to parse file.\nType 'search' to search file.")
@@ -110,7 +110,7 @@ class FileChangeHandler(FileSystemEventHandler):
 
 
 if __name__ == "__main__":
-    filegpt = FileGPT("google/flan-t5-large")
+    filegpt = FileGPT("sentence-transformers/all-mpnet-base-v2")
 
     event_handler = FileChangeHandler(filegpt)
     observer = Observer()
