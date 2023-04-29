@@ -100,7 +100,7 @@ class DataBase(object):
 
 
     def retrieve_data(self, indices):
-        indices = indices.tolist()[0]
+        indices = indices.tolist()
 
         c = self.conn.cursor()
         placeholders = ','.join('?' * len(indices))
@@ -108,17 +108,18 @@ class DataBase(object):
         c.execute(query, tuple(indices))
         rows = c.fetchall()
         column_names = [desc[0] for desc in c.description]
-        print(column_names)
+        # print(column_names)
 
-        for i, row in enumerate(rows):
-            print(f"Result {i+1}:")
+        # for i, row in enumerate(rows):
+        #     print(f"Result {i+1}:")
 
-            for name, value in zip(column_names, row):
-                if name in ['title', 'file_path', 'page', 'author', 'subject', 'content']:
-                    print(f"{name}: {value}")
+        #     for name, value in zip(column_names, row):
+        #         if name in ['title', 'file_path', 'page', 'author', 'subject', 'content']:
+        #             print(f"{name}: {value}")
             
-            print('\n')
+        #     print('\n')
 
+        return column_names, rows
 
     def close(self):
         self.conn.close()

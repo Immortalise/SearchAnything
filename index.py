@@ -25,9 +25,9 @@ class Index(object):
         faiss.write_index(self.index, INDEX_PATH)
 
 
-    def search_index(self, query_embedding, k=5):
+    def search_index(self, query_embedding, k=50):
         distances, indices = self.index.search(query_embedding[np.newaxis, :], k)
-        return indices, distances
+        return indices[0], distances[0]
 
   
     def rebuild_index(self, line_list, inserted_ids):
