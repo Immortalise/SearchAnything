@@ -5,18 +5,18 @@ from bs4 import BeautifulSoup
 from utils import encode_text
 
 
-def process_file(file_path, file_type, tokenizer, model):
+def process_file(file_path, file_type, model):
     if file_type == "pdf":
-        return process_pdf(file_path, tokenizer, model)
+        return process_pdf(file_path, model)
     elif file_type == "md":
-        return process_markdown(file_path, tokenizer, model)
+        return process_markdown(file_path, model)
     elif file_type == "txt":
-        return process_text(file_path, tokenizer, model)
+        return process_text(file_path, model)
     else:
         print("File type not supported.")
 
 
-def process_text(txt_file_path, tokenizer, model):  
+def process_text(txt_file_path, model):  
     line_list = []  
   
     with open(txt_file_path, 'r', encoding='utf-8') as txt_file:  
@@ -30,7 +30,7 @@ def process_text(txt_file_path, tokenizer, model):
         file_dict['author'] = None  
         file_dict['page'] = None  
         file_dict['content'] = line.strip()  
-        file_dict['embedding'] = encode_text(tokenizer, model, line.strip())  
+        file_dict['embedding'] = encode_text(model, line.strip())  
         file_dict['file_path'] = txt_file_path  
         file_dict['subject'] = None  
   
@@ -39,7 +39,7 @@ def process_text(txt_file_path, tokenizer, model):
     return line_list  
 
   
-def process_markdown(md_file_path, tokenizer, model):  
+def process_markdown(md_file_path, model):  
     line_list = []  
   
     with open(md_file_path, 'r', encoding='utf-8') as md_file:  
@@ -60,7 +60,7 @@ def process_markdown(md_file_path, tokenizer, model):
         file_dict['author'] = None  
         file_dict['page'] = None  
         file_dict['content'] = line  
-        file_dict['embedding'] = encode_text(tokenizer, model, line)  
+        file_dict['embedding'] = encode_text(model, line)  
         file_dict['file_path'] = md_file_path  
         file_dict['subject'] = None  
   
@@ -69,7 +69,7 @@ def process_markdown(md_file_path, tokenizer, model):
     return line_list  
 
 
-def process_pdf(pdf_file_path, tokenizer, model):
+def process_pdf(pdf_file_path, model):
     line_list = []
   
     reader = PdfReader(pdf_file_path)
@@ -117,7 +117,7 @@ def process_pdf(pdf_file_path, tokenizer, model):
             file_dict['author'] = pdf_author
             file_dict['page'] = page_num + 1
             file_dict['content'] = line
-            file_dict['embedding'] = encode_text(tokenizer, model, line)
+            file_dict['embedding'] = encode_text(model, line)
             file_dict['file_path'] = pdf_file_path
             file_dict['subject'] = pdf_subject
 

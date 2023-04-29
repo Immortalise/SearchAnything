@@ -2,9 +2,9 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 import pickle
 import os
+from sentence_transformers import SentenceTransformer
 
 from config import MONITORED_DIRS_PATH
-from model import create_model
 from database import DataBase
 from utils import encode_text, filter_subdirectories, list_files_with_type
 from process import process_file
@@ -14,13 +14,13 @@ from config import SUPPORTED_FILE_TYPE
 
 class FileGPT(object):
     def __init__(self, model_name):
-        self.tokenizer, self.model = create_model(model_name)
+        self.model = SentenceTransformer(model_name)
         self.index = Index(dim=768)
         self.db = DataBase()
         print("FileGPT v0.1")
         print("Type 'exit' to exit.\nType 'insert' to parse file.\nType 'search' to search file.")
-    
-    
+
+   
     def run(self):
         while True:
             input_text = input("Instruction: ")
@@ -35,8 +35,7 @@ class FileGPT(object):
 
             elif input_text == "search":
                 input_text = input("Search text: ")
-                result = self.search(input_text)
-                print(result)
+                self.search(input_text)
 
             else:
                 print("Invalid instruction.")
@@ -51,7 +50,7 @@ class FileGPT(object):
                 
                 print("Processing file: ", file_path)
 
-                line_list = process_file(file_path, file_type, self.tokenizer, self.model)
+                line_list = process_file(file_path, file_type, self.model)
                 inserted_ids = self.db.insert_data(line_list)
                 self.index.insert_index(line_list, inserted_ids)
 
@@ -63,11 +62,44 @@ class FileGPT(object):
 
 
     def search(self, input_text):
-        query_embedding = encode_text(self.tokenizer, self.model, input_text)
+        query_embedding = encode_text(self.model, input_text)
         indices, distances = self.index.search_index(query_embedding)
-        print(indices, distances)
-        self.db.retrieve_data(indices)
+        columns, results = self.db.retrieve_data(indices)
+        
+        return self._process_output(distances, columns, results)
 
+
+    def _process_output(self, distances, columns, raw_results):
+        dict_list = []
+        for distance, raw_result in zip(distances, raw_results):
+            d = {}
+            d['distance'] = distance
+            for column, result in zip(columns, raw_result):
+                d[column] = result
+            
+            dict_list.append(d)
+
+        combined_dict = {}  
+    
+        for d in dict_list:  
+            file_path = d["file_path"]  
+    
+            if file_path not in combined_dict.keys():  
+                combined_dict[file_path] = {  
+                    "min_distance": float("inf"),
+                    "content": [],  
+                    "distance": [],  
+                    "page": [],  
+                }  
+
+            combined_dict[file_path]["min_distance"] = min(combined_dict[file_path]["min_distance"], d["distance"])
+            combined_dict[file_path]["content"].append(d["content"])  
+            combined_dict[file_path]["page"].append(d["page"])
+            combined_dict[file_path]["distance"].append(d["distance"])  
+
+        sorted_list = sorted(combined_dict.items(), key=lambda x: x[1]["min_distance"])  
+
+        return sorted_list 
     
     def close(self):
         self.db.close()

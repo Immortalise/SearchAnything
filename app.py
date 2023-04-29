@@ -2,15 +2,23 @@ import os
 import streamlit as st  
 import tkinter as tk
 from tkinter import filedialog
+from filegpt import FileGPT
+
+@st.cache_resource()  
+def create_filegpt_instance():  
+    return FileGPT("sentence-transformers/all-mpnet-base-v2")
 
 
-def search_database(query, search_types):  
-    results = [  
-        f"文本结果1：{query}",  
-        f"文本结果2：{query}",  
-        f"图片结果1：{query}",  
-        f"音频结果1：{query}",  
-    ]  
+def search_database(query, search_types): 
+    filegpt = create_filegpt_instance()
+    results = filegpt.search(query) 
+    # print(results)
+    # results = [  
+    #     f"文本结果1：{query}",  
+    #     f"文本结果2：{query}",  
+    #     f"图片结果1：{query}",  
+    #     f"音频结果1：{query}",  
+    # ]  
     return results  
 
   
@@ -47,9 +55,13 @@ if app_choice == "搜索应用程序":
   
         search_results = search_database(search_query, search_types)  
         st.write("搜索结果：")  
-        for i, result in enumerate(search_results):  
-            with st.beta_expander(f"结果 {i + 1}"):  
-                st.write(result)  
+        for file_path, file_info in search_results:  
+            # 为每个文件创建一个beta_expander  
+            expander = st.expander(f"{file_path} - 最小距离：{file_info['min_distance']:.2f}")  
+    
+            # 在展开器中显示文件的内容  
+            for content, distance, page in zip(file_info["content"], file_info["distance"], file_info["page"]):
+                expander.write(f"页面：{page}，距离：{distance}\n内容：{content}")
   
 elif app_choice == "文件浏览器":  
     st.title("文件浏览器")  
