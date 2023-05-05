@@ -5,6 +5,7 @@
 # files/
 data/
 .DS_Store
+mytest.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
