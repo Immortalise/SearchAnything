@@ -121,6 +121,13 @@ class DataBase(object):
 
         return column_names, rows
 
+    def retrieve_data_custom_query(self, query):
+        c = self.conn.cursor()
+        c.execute(query)
+        rows = c.fetchall()
+        column_names = [desc[0] for desc in c.description]
+        return column_names, rows
+
     def close(self):
         self.conn.close()
 
