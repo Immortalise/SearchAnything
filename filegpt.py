@@ -4,16 +4,19 @@ import pickle
 import os
 from sentence_transformers import SentenceTransformer
 
-from config import MONITORED_DIRS_PATH
+from config import MONITORED_DIRS_PATH, DATA_DIR, SUPPORTED_FILE_TYPE
 from database import DataBase
 from utils import encode_text, filter_subdirectories, list_files_with_type
 from process import process_file
 from index import Index
-from config import SUPPORTED_FILE_TYPE
 
 
 class FileGPT(object):
     def __init__(self, model_name):
+
+        if not os.path.exists(DATA_DIR):
+            os.makedirs(DATA_DIR)
+                  
         self.model = SentenceTransformer(model_name)
         self.index = Index(dim=768)
         self.db = DataBase()
