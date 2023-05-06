@@ -2,8 +2,10 @@ from pathlib import Path
 from typing import Any, List
 from .parser_base import BaseParser
 from .pdfparser import PDFParser
+from .docparser import WordParser
+from .pptparser import PPTXParser
 
-parsers: List[BaseParser] = [PDFParser]
+parsers: List[BaseParser] = [PDFParser, WordParser, PPTXParser]
 
 
 def _get_parser(file_type: str) -> BaseParser:
