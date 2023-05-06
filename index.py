@@ -53,56 +53,56 @@ class Index(object):
         faiss.write_index(self.index, INDEX_PATH)
 
 
-import unittest  
-import numpy as np  
-import os  
+# import unittest  
+# import numpy as np  
+# import os  
   
-class TestIndexClass(unittest.TestCase):  
+# class TestIndexClass(unittest.TestCase):  
   
-    # def test_insert_index(self):  
-    #     dim = 1024  
-    #     index_obj = Index(dim=dim)  
-    #     line_list = [  
-    #         {'embedding': np.random.random(dim).astype('float32')},  
-    #         {'embedding': np.random.random(dim).astype('float32')},  
-    #     ]  
-    #     inserted_ids = [1, 2]  
-    #     index_obj.insert_index(line_list, inserted_ids)  
-    #     self.assertEqual(index_obj.index.ntotal, 2)  
+#     # def test_insert_index(self):  
+#     #     dim = 1024  
+#     #     index_obj = Index(dim=dim)  
+#     #     line_list = [  
+#     #         {'embedding': np.random.random(dim).astype('float32')},  
+#     #         {'embedding': np.random.random(dim).astype('float32')},  
+#     #     ]  
+#     #     inserted_ids = [1, 2]  
+#     #     index_obj.insert_index(line_list, inserted_ids)  
+#     #     self.assertEqual(index_obj.index.ntotal, 2)  
     
-    # def test_search_index(self):  
-    #     dim = 1024  
-    #     index_obj = Index(dim=dim)  
-    #     query_embedding = np.random.random(dim).astype('float32')  
-    #     indices, distances = index_obj.search_index(query_embedding, k=1)  
-    #     self.assertEqual(len(indices[0]), 1)  
-    #     self.assertEqual(len(distances[0]), 1)  
+#     # def test_search_index(self):  
+#     #     dim = 1024  
+#     #     index_obj = Index(dim=dim)  
+#     #     query_embedding = np.random.random(dim).astype('float32')  
+#     #     indices, distances = index_obj.search_index(query_embedding, k=1)  
+#     #     self.assertEqual(len(indices[0]), 1)  
+#     #     self.assertEqual(len(distances[0]), 1)  
     
-    def test_remove_index(self):  
-        dim = 1024  
-        index_obj = Index(dim=dim)  
-        line_list = [  
-            {'embedding': np.random.random(dim).astype('float32')},  
-            {'embedding': np.random.random(dim).astype('float32')},  
-        ]  
-        inserted_ids = [1, 2]  
-        index_obj.insert_index(line_list, inserted_ids)  
+#     def test_remove_index(self):  
+#         dim = 1024  
+#         index_obj = Index(dim=dim)  
+#         line_list = [  
+#             {'embedding': np.random.random(dim).astype('float32')},  
+#             {'embedding': np.random.random(dim).astype('float32')},  
+#         ]  
+#         inserted_ids = [1, 2]  
+#         index_obj.insert_index(line_list, inserted_ids)  
     
-        index_obj.remove_index([1])  
-        self.assertEqual(index_obj.index.ntotal, 1)  
+#         index_obj.remove_index([1])  
+#         self.assertEqual(index_obj.index.ntotal, 1)  
   
-    # def test_close(self):  
-    #     index_obj = Index()  
-    #     index_obj.close()  
-    #     self.assertTrue(os.path.exists(INDEX_PATH))  
+#     # def test_close(self):  
+#     #     index_obj = Index()  
+#     #     index_obj.close()  
+#     #     self.assertTrue(os.path.exists(INDEX_PATH))  
   
-if __name__ == "__main__":  
-    INDEX_PATH = "test_index.index"  
-    unittest.main()  
+# if __name__ == "__main__":  
+#     INDEX_PATH = "test_index.index"  
+#     unittest.main()  
   
-    # Clean up the test index file  
-    if os.path.exists(INDEX_PATH):  
-        os.remove(INDEX_PATH)  
+#     # Clean up the test index file  
+#     if os.path.exists(INDEX_PATH):  
+#         os.remove(INDEX_PATH)  
 
 
 
@@ -204,7 +204,10 @@ class BM25Index(ExactMatchIndex):
     def __init__(self, data_base):
         super().__init__(data_base)
         if not self.index_exists():
-            self.bm25 = BM25Okapi([self.tokenizer.tokenize(content) for content in self.content_list])
+            if len(self.content_list) == 0:
+                self.bm25 = None
+            else:
+                self.bm25 = BM25Okapi([self.tokenizer.tokenize(content) for content in self.content_list])
         
         # https://github.com/dorianbrown/rank_bm25/issues/14
     

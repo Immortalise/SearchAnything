@@ -40,17 +40,17 @@ class FileGPT(object):
                 path = input("File path: ")
                 self.delete(path)
             
-            elif input_text == "search":
+            elif input_text == "semantic_search":
                 input_text = input("Search text: ")
-                self.search(input_text)
+                self.semantic_search(input_text)
             
-            elif input_text == "search_bm25":
+            elif input_text == "bm25_search":
                 input_text = input("Search text: ")
-                self.search_bm25(input_text)
+                self.bm25_search(input_text)
             
-            elif input_text == "search_exact":
+            elif input_text == "exact_search":
                 input_text = input("Search text: ")
-                self.search_exact(input_text)
+                self.exact_search(input_text)
 
             else:
                 print("Invalid instruction.")
@@ -78,19 +78,19 @@ class FileGPT(object):
         self.bm25_index.rebuild_index(remaining_embeddings, remaining_ids)
         self.exact_macth_index.rebuild_index(remaining_embeddings, remaining_ids)
 
-    def search(self, input_text):
+    def semantic_search(self, input_text):
         query_embedding = encode_text(self.model, input_text)
         indices, distances = self.index.search_index(query_embedding)
         columns, results = self.db.retrieve_data(indices)
         
         return self._process_output(distances, columns, results)
 
-    def search_bm25(self, input_text):
+    def bm25_search(self, input_text):
         indices, distances = self.bm25_index.search_index(input_text)
         columns, results = self.db.retrieve_data(indices)
         return self._process_output(distances, columns, results)
     
-    def search_exact(self, input_text):
+    def exact_search(self, input_text):
         indices, distances = self.exact_macth_index.search_index(input_text)
         columns, results = self.db.retrieve_data(indices)
         return self._process_output(distances, columns, results)
