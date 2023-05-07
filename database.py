@@ -54,7 +54,7 @@ class DataBase(object):
 
             line['embedding'] = np.frombuffer(line['embedding'], dtype=np.float32)
 
-            conn.close()
+        conn.close()
 
         return inserted_ids
 
