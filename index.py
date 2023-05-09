@@ -108,74 +108,38 @@ class Index(object):
 
 # =============================================================================
 # Exact Match
-def kmp_search(query, corpus):
-    n = len(query)
-    m = len(corpus)
-    lps = [0] * n
-    j = 0
-    matches = []
-    compute_lps(query, n, lps)
-    i = 0
-    while i < m:
-        if query[j] == corpus[i]:
-            i += 1
-            j += 1
-        if j == n:
-            matches.append(i-j)
-            j = lps[j-1]
-        elif i < m and query[j] != corpus[i]:
-            if j != 0:
-                j = lps[j-1]
-            else:
-                i += 1
-    return matches
-
-def compute_lps(query, n, lps):
-    len = 0
-    lps[0] = 0
-    i = 1
-    while i < n:
-        if query[i] == query[len]:
-            len += 1
-            lps[i] = len
-            i += 1
-        else:
-            if len != 0:
-                len = lps[len-1]
-            else:
-                lps[i] = 0
-                i += 1
-
 class ExactMatchIndex():
     def __init__(self, data_base):
-        self.tokenizer = AutoTokenizer.from_pretrained('bert-base-multilingual-cased')
         if self.index_exists():
             self.load_index()
         else:
-            full_data = data_base.retrieve_data_custom_query("SELECT * FROM file_data")
+            full_data = data_base.retrieve_data_custom_query("SELECT id, content FROM file_data")
             self.docid_list = []
             self.content_list = []
-            # id: 0, title: 1, file_path: 2, page: 3, author: 4, subject: 5, content: 6
             for doc in full_data[1]:
-                docid, content = doc[0], doc[6]
+                docid, content = doc[0], doc[1]
                 self.docid_list.append(docid)
-                self.content_list.append(content)
-
-    def insert_index(self, line_list, inserted_ids):
-        self.content_list = self.content_list + [doc['content'] for doc in line_list]
-        self.docid_list = self.docid_list + inserted_ids
+                self.content_list.append(content.lower())
     
-    def rebuild_index(self, line_list, inserted_ids):
-        self.content_list = [doc['content'] for doc in line_list]
+    def insert_index(self, line_list, inserted_ids, save_index=True):
+        self.content_list = self.content_list + [doc['content'].lower() for doc in line_list]
+        self.docid_list = self.docid_list + inserted_ids
+        if save_index:
+            self.save_index()
+    
+    def rebuild_index(self, line_list, inserted_ids, save_index=True):
+        self.content_list = [doc['content'].lower() for doc in line_list]
         self.docid_list = inserted_ids
+        if save_index:
+            self.save_index()
     
     def search_index(self, query, k=50):
         indices = []
+        query = query.lower()
         for idx, doc in enumerate(self.content_list):
-            doc_matches = kmp_search(query, doc)
-            if len(doc_matches) > 0:
+            if query in doc:
                 indices.append(self.docid_list[idx])
-        return np.array(self.docid_list)[indices][:k], np.zeros(len(indices))[:k]
+        return np.array(indices)[:k], np.zeros(len(indices))[:k]
 
     def save_index(self):
         with open(DOCID_LIST_PATH, "wb") as f:
@@ -203,6 +167,7 @@ class ExactMatchIndex():
 class BM25Index(ExactMatchIndex):
     def __init__(self, data_base):
         super().__init__(data_base)
+        self.tokenizer = AutoTokenizer.from_pretrained('bert-base-multilingual-cased')
         if not self.index_exists():
             if len(self.content_list) == 0:
                 self.bm25 = None
@@ -211,16 +176,20 @@ class BM25Index(ExactMatchIndex):
         
         # https://github.com/dorianbrown/rank_bm25/issues/14
     
-    def insert_index(self, line_list, inserted_ids):
-        super().insert_index(line_list, inserted_ids)
+    def insert_index(self, line_list, inserted_ids, save_index=True):
+        super().insert_index(line_list, inserted_ids, save_index=False)
         self.bm25 = BM25Okapi([self.tokenizer.tokenize(content) for content in self.content_list])
+        if save_index:
+            self.save_index()
 
-    def rebuild_index(self, line_list, inserted_ids):
-        super().rebuild_index(line_list, inserted_ids)
+    def rebuild_index(self, line_list, inserted_ids, save_index=True):
+        super().rebuild_index(line_list, inserted_ids, save_index=False)
         self.bm25 = BM25Okapi([self.tokenizer.tokenize(content) for content in self.content_list])
-        self.save_index()
+        if save_index:
+            self.save_index()
 
     def search_index(self, query, k=50):
+        query = query.lower()
         doc_scores = -1 * self.bm25.get_scores(self.tokenizer.tokenize(query))
         sorted_indices = np.argsort(doc_scores)
         return np.array(self.docid_list)[sorted_indices][:k], np.array(doc_scores)[sorted_indices][:k]
