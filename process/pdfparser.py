@@ -82,7 +82,7 @@ class PDFParser(BaseParser):
         page_sents = self._merge_sentences(page_sents=page_sents)
         return page_sents
     
-    def _merge_sentences(self, page_sents, len_thres=500) -> List[Tuple[int, str]]:
+    def _merge_sentences(self, page_sents, len_thres=300) -> List[Tuple[int, str]]:
         """
         Merge sentences to make one sentence around 500-word length
         """
