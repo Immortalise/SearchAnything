@@ -73,7 +73,7 @@ class PDFParser(BaseParser):
             for sent in sents:
                 # remove references
                 if sent.strip().lower() == "references" or sent.strip().lower().startswith("references "):
-                    print("aaa")
+                    # print("aaa")
                     ref_flag = True
                     break
                 page_sents.append((pageno, sent))

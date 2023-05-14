@@ -1,8 +1,10 @@
-technical path1 causality
-3 types：
-scm
-po （stable learning）
+Open domain machine learning:
+
+technical path 1: causality
+3 types:
+structure causal modeling
+potential output （stable learning）
 disentangled - causality （bengio）
 
 
-technical path2 finding invariance from invariance
+technical path 2: finding invariance from invariance

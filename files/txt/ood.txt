@@ -1,1 +1,1 @@
-The concept of “invariance” is of great importance to deal with out-of-distribution examples, as well as interpretable models.
+The concept of "invariance" is of great importance to deal with out-of-distribution examples, as well as interpretable models.
