@@ -31,18 +31,17 @@ class PDFParser(BaseParser):
             return None
         
         self.parse_output = []
-        for pageno, sents in page_sents:
-            for sent in sents:
-                file_dict = {}
-                file_dict['title'] = self.metadata["title"]
-                file_dict['author'] = self.metadata["author"]
-                file_dict['page'] = pageno
-                file_dict['content'] = sent
-                file_dict['embedding'] = encode_text(self.model, sent)
-                file_dict['file_path'] = self.file_path
-                file_dict['subject'] = self.metadata["subject"]
-                
-                self.parse_output.append(file_dict)
+        for pageno, sent in page_sents:
+            file_dict = {}
+            file_dict['title'] = self.metadata["title"]
+            file_dict['author'] = self.metadata["author"]
+            file_dict['page'] = pageno
+            file_dict['content'] = sent
+            file_dict['embedding'] = encode_text(self.model, sent)
+            file_dict['file_path'] = self.file_path
+            file_dict['subject'] = self.metadata["subject"]
+            
+            self.parse_output.append(file_dict)
         
         return self.parse_output
 
