@@ -32,18 +32,18 @@ class MDParser(BaseParser):
             return None
         
         self.parse_output = []
-        for _, sents in page_sents:
-            for sent in sents:
-                file_dict = {}
-                file_dict['title'] = None
-                file_dict['author'] = None
-                file_dict['page'] = None
-                file_dict['content'] = sent
-                file_dict['embedding'] = encode_text(self.model, sent)
-                file_dict['file_path'] = self.file_path
-                file_dict['subject'] = None
-                
-                self.parse_output.append(file_dict)
+        
+        for _, sent in page_sents:
+            file_dict = {}
+            file_dict['title'] = None
+            file_dict['author'] = None
+            file_dict['page'] = None
+            file_dict['content'] = sent
+            file_dict['embedding'] = encode_text(self.model, sent)
+            file_dict['file_path'] = self.file_path
+            file_dict['subject'] = None
+            
+            self.parse_output.append(file_dict)
         
         return self.parse_output
 
@@ -65,6 +65,7 @@ class MDParser(BaseParser):
         # remove hyphens 
         raw_text = re.sub(r"-\n(\w+)", r"\1", raw_text)
         raw_text = raw_text.replace("\n", " ")
+        
         return list(map(lambda x: (0, x), sent_tokenize(raw_text)))
 
     
