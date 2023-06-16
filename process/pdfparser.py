@@ -31,18 +31,17 @@ class PDFParser(BaseParser):
             return None
         
         self.parse_output = []
-        for pageno, sents in page_sents:
-            for sent in sents:
-                file_dict = {}
-                file_dict['title'] = self.metadata["title"]
-                file_dict['author'] = self.metadata["author"]
-                file_dict['page'] = pageno
-                file_dict['content'] = sent
-                file_dict['embedding'] = encode_text(self.model, sent)
-                file_dict['file_path'] = self.file_path
-                file_dict['subject'] = self.metadata["subject"]
-                
-                self.parse_output.append(file_dict)
+        for pageno, sent in page_sents:
+            file_dict = {}
+            file_dict['title'] = self.metadata["title"]
+            file_dict['author'] = self.metadata["author"]
+            file_dict['page'] = pageno
+            file_dict['content'] = sent
+            file_dict['embedding'] = encode_text(self.model, sent)
+            file_dict['file_path'] = self.file_path
+            file_dict['subject'] = self.metadata["subject"]
+            
+            self.parse_output.append(file_dict)
         
         return self.parse_output
 
@@ -66,8 +65,50 @@ class PDFParser(BaseParser):
             raw_text = raw_text.replace("\n", " ")
             page_text.append((pageno + 1, raw_text))
 
-        page_sents = map(lambda x: (x[0], sent_tokenize(x[1])), page_text)
+        page_sents = []
+        ref_flag = False
+        for pageno, text in page_text:
+            sents = sent_tokenize(text)
+            for sent in sents:
+                # remove references
+                if sent.strip().lower() == "references" or sent.strip().lower().startswith("references "):
+                    # print("aaa")
+                    ref_flag = True
+                    break
+                page_sents.append((pageno, sent))
+            if ref_flag:
+                    break
+            
+        page_sents = self._merge_sentences(page_sents=page_sents)
         return page_sents
+    
+    def _merge_sentences(self, page_sents, len_thres=300) -> List[Tuple[int, str]]:
+        """
+        Merge sentences to make one sentence around 500-word length
+        """
+        merged_sents = []
+        cur_pageno = None
+        cur_sent = ''
+        for pageno, sent in page_sents:
+            if not cur_pageno:
+                cur_pageno = pageno
+                cur_sent = sent
+            elif cur_pageno == pageno:
+                if len(cur_sent.split()) + len(sent.split()) < len_thres:
+                    cur_sent += " " + sent
+                else:
+                    merged_sents.append((cur_pageno, cur_sent))
+                    cur_pageno = pageno
+                    cur_sent = sent
+            else:
+                merged_sents.append((cur_pageno, cur_sent))
+                cur_pageno = pageno
+                cur_sent = sent
+        
+        if cur_sent:
+            merged_sents.append((cur_pageno, cur_sent))
+        return merged_sents
+
     
     @property
     def metadata(self) -> defaultdict:
