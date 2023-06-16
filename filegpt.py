@@ -1,27 +1,54 @@
 import os
 from sentence_transformers import SentenceTransformer
 
-from config import DATA_DIR, SUPPORTED_FILE_TYPE
-from database import DataBase
+from config import DATA_DIR, SUPPORTED_FILE_TYPE, TEXT_EMBEDDING_MODELS, IMAGE_EMBEDDING_MODELS
+from db import File_DB, Image_DB
 from utils import encode_text, list_files_with_type
 from process import process_file
-from index import Index, BM25Index, ExactMatchIndex
-from config import SUPPORTED_FILE_TYPE    
+from index import SemanticIndex, BM25Index, ExactMatchIndex
 
 
 class FileGPT(object):
-    def __init__(self, model_name):
+    def __init__(self):
 
         if not os.path.exists(DATA_DIR):
             os.makedirs(DATA_DIR)
                   
-        self.model = SentenceTransformer(model_name)
-        self.index = Index(dim=768)
-        self.db = DataBase()
-        self.bm25_index = BM25Index(self.db)
-        self.exact_macth_index = ExactMatchIndex(self.db)
-        print("FileGPT v0.1")
-        print("Type 'exit' to exit.\nType 'insert' to parse file.\nType 'search' to search file.\nType 'search_bm25' to search file with bm25.\nType 'search_exact' to search file with exact match.\nType 'delete' to delete file.")
+        self.models = self.load_models(["sentence-transformers/all-mpnet-base-v2", "clip-ViT-B-32"])
+        self.indices = self.load_indices()
+        self.dbs = self.load_dbs()
+
+        print("FileGPT v0.2.0")
+        print("Type 'exit' to exit.\n\
+              Type 'insert' to parse file.\n\
+              Type 'search' to search file.\n\
+              Type 'search_bm25' to search file with bm25.\n\
+              Type 'search_exact' to search file with exact match.\n\
+              Type 'delete' to delete file.")
+        
+    def load_dbs(self):
+        return {"file": File_DB(), "image": Image_DB()}
+
+    def load_indices(self):
+        indices = {}
+
+        for data_type in self.dbs.keys():
+            if data_type == "file":
+                type_indices = {"semantic": SemanticIndex(dim=768), "bm25": BM25Index(self.dbs[data_type]), "exact": ExactMatchIndex(self.dbs[data_type])}
+            elif data_type == "image":
+                type_indices = {"semantic": SemanticIndex(dim=512), "bm25": BM25Index(self.dbs[data_type]), "exact": ExactMatchIndex(self.dbs[data_type])}
+            
+            indices[type] = type_indices
+        
+        return indices
+
+
+    def load_models(self, model_names):
+        for model_name in model_names:
+            if model_name in TEXT_EMBEDDING_MODELS or model_name in IMAGE_EMBEDDING_MODELS:
+                self.model = SentenceTransformer(model_name)
+            else:
+                raise ValueError("Model name not supported.")
 
    
     def run(self):
@@ -61,40 +88,50 @@ class FileGPT(object):
         for file in file_list:
             file_path = file['path']
             file_type = file['type']
-            if (file_type in SUPPORTED_FILE_TYPE) and (file_path not in self.db.get_existing_file_paths()):
+            db = self.dbs[file_type]
+            type_indices = self.indices[file_type]
+
+            if (file_type in SUPPORTED_FILE_TYPE) and (file_path not in db.get_existing_file_paths()):
                 
                 print("Processing file: ", file_path)
 
                 line_list = process_file(file_path, file_type, self.model)
-                inserted_ids = self.db.insert_data(line_list)
-                self.index.insert_index(line_list, inserted_ids)
-                self.bm25_index.insert_index(line_list, inserted_ids)
-                self.exact_macth_index.insert_index(line_list, inserted_ids)
+                inserted_ids = db.insert_data(line_list)
+                for _, index in type_indices.items():
+                    index.insert_index(line_list, inserted_ids)
 
-    def delete(self, path):
-        is_dir = os.path.isdir(path)
-        remaining_embeddings, remaining_ids = self.db.delete_data(path, is_directory=is_dir)
-        self.index.rebuild_index(remaining_embeddings, remaining_ids)
-        self.bm25_index.rebuild_index(remaining_embeddings, remaining_ids)
-        self.exact_macth_index.rebuild_index(remaining_embeddings, remaining_ids)
 
-    def semantic_search(self, input_text):
-        query_embedding = encode_text(self.model, input_text)
-        indices, distances = self.index.search_index(query_embedding)
-        columns, results = self.db.retrieve_data(indices)
+    # def delete(self, path):
+    #     is_dir = os.path.isdir(path)
+        
+    #     remaining_embeddings, remaining_ids = self.db.delete_data(path, is_directory=is_dir)
+    #     self.index.rebuild_index(remaining_embeddings, remaining_ids)
+    #     self.bm25_index.rebuild_index(remaining_embeddings, remaining_ids)
+    #     self.exact_macth_index.rebuild_index(remaining_embeddings, remaining_ids)
+
+    def semantic_search(self, data_type, input_text):
+
+        query_embedding = encode_text(self.models["file"], input_text)
+        data_idxs, distances = self.indices[data_type]["semantic"].search_index(query_embedding)
+        columns, results = self.dbs[data_type].retrieve_data(data_idxs)
         
         return self._process_output(distances, columns, results)
+    
 
-    def bm25_search(self, input_text):
-        indices, distances = self.bm25_index.search_index(input_text)
-        columns, results = self.db.retrieve_data(indices)
+    def bm25_search(self, data_type, input_text):
+        data_idxs, distances = self.indices[data_type]["bm25"].search_index(input_text)
+        columns, results = self.dbs[data_type].retrieve_data(data_idxs)
+        
         return self._process_output(distances, columns, results)
     
-    def exact_search(self, input_text):
-        indices, distances = self.exact_macth_index.search_index(input_text)
-        columns, results = self.db.retrieve_data(indices)
+
+    def exact_search(self, data_type, input_text):
+        data_idxs, distances = self.indices[data_type]["exact"].search_index(input_text)
+        columns, results = self.dbs[data_type].retrieve_data(data_idxs)
+
         return self._process_output(distances, columns, results)
     
+
     def _process_output(self, distances, columns, raw_results):
         dict_list = []
         for distance, raw_result in zip(distances, raw_results):
@@ -128,14 +165,17 @@ class FileGPT(object):
         return sorted_list 
     
     def close(self):
-        self.db.close()
-        self.index.close()
-        self.bm25_index.close()
-        self.exact_macth_index.close()
+        for db in self.dbs.values():
+            db.close()
+        
+        for type_indices in self.indices.values():
+            for index in type_indices.values():
+                index.close()
+
 
 
 if __name__ == "__main__":
-    filegpt = FileGPT("sentence-transformers/all-mpnet-base-v2")
+    filegpt = FileGPT()
     filegpt.run()
 
 

@@ -1,6 +1,30 @@
-import torch
 import os
+import sys  
+import subprocess  
+import requests  
+import re  
 
+from config import __version__  
+
+
+def check_for_updates():
+    response = requests.get(f"https://github.com/Immortalise/FileGPT/releases/latest")
+    latest_version = re.search(r"releases/tag/v([\d.]+)", response.url).group(1)
+  
+    if latest_version != __version__:
+        print(f"Update available!\nCurrent version: {__version__}\nLatest version: {latest_version}\nPlease visit https://github.com/{user}/{repo}/releases/latest to get the latest version.")
+    else:  
+        print("You are using the latest version.")
+
+  
+def update_and_restart():  
+    try:  
+        subprocess.check_call(["git", "pull"])
+  
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+    except Exception as e:
+        print(f"Update error: {str(e)}")
+        sys.exit(1)
 
 # def get_directory_state(path):  
 #     directory_state = {}  
@@ -78,6 +102,15 @@ def encode_text(model, input_text):
 
     return embedding 
 
+
+def encode_image(model, input_image):
+    embedding = model.encode(input_image)
+
+    import numpy as np
+    embedding_l2 = np.linalg.norm(embedding)
+    embedding = embedding / embedding_l2
+
+    return embedding
 
 # def summarize_text(tokenizer, model, input_text):
 
