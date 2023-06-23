@@ -1,58 +1,64 @@
 import os
 from sentence_transformers import SentenceTransformer
 
-from config import DATA_DIR, SUPPORTED_FILE_TYPE, TEXT_EMBEDDING_MODELS, IMAGE_EMBEDDING_MODELS
-from db import File_DB, Image_DB
-from utils import encode_text, list_files_with_type
+from config import DATA_DIR, TEXT_EMBEDDING_MODELS, IMAGE_EMBEDDING_MODELS
+from database import Text_DB, Image_DB
+from utils import encode_text, encode_image, list_files
 from process import process_file
-from index import SemanticIndex, BM25Index, ExactMatchIndex
+from index import SemanticIndex
 
 
 class Anything(object):
     def __init__(self, models=None):
 
         if models is None:
-            models = ["sentence-transformers/all-mpnet-base-v2", "clip-ViT-B-32"]
+            default_models = ["sentence-transformers/all-mpnet-base-v2", "clip-ViT-B-32"]
 
         if not os.path.exists(DATA_DIR):
             os.makedirs(DATA_DIR)  
         
         self.dbs = self.load_dbs()
-        self.models = self.load_models(models)
+        self.models = self.load_models(default_models)
         self.indices = self.load_indices()
 
-        print("Anything v0.2.0")
+        
+
+        print("Anything v1.0")
         print("Type 'exit' to exit.\n\
               Type 'insert' to parse file.\n\
               Type 'search' to search file.\n\
-              Type 'search_bm25' to search file with bm25.\n\
-              Type 'search_exact' to search file with exact match.\n\
               Type 'delete' to delete file.")
         
     def load_dbs(self):
-        return {"file": File_DB(), "image": Image_DB()}
+        return {"text": Text_DB(), "image": Image_DB()}
 
     def load_indices(self):
         indices = {}
 
         for data_type in self.dbs.keys():
-            if data_type == "file":
-                type_indices = {"semantic": SemanticIndex(dim=768), "bm25": BM25Index(self.dbs[data_type]), "exact": ExactMatchIndex(self.dbs[data_type])}
+            if data_type == "text":
+                type_indices = {"semantic": SemanticIndex(dim=768, data_type=data_type)}
             elif data_type == "image":
-                type_indices = {"semantic": SemanticIndex(dim=512), "bm25": BM25Index(self.dbs[data_type]), "exact": ExactMatchIndex(self.dbs[data_type])}
+                type_indices = {"semantic": SemanticIndex(dim=512, data_type=data_type)}
             
-            indices[type] = type_indices
+            indices[data_type] = type_indices
         
         return indices
 
 
     def load_models(self, model_names):
+        models = {}
         for model_name in model_names:
-            if model_name in TEXT_EMBEDDING_MODELS or model_name in IMAGE_EMBEDDING_MODELS:
-                self.model = SentenceTransformer(model_name)
+            if model_name in TEXT_EMBEDDING_MODELS:
+                print("Adding text embedding model")
+                models["text"] = SentenceTransformer(model_name)
+            elif model_name in IMAGE_EMBEDDING_MODELS:
+                print("Adding image embedding model")
+                models["image"] = SentenceTransformer(model_name)
             else:
                 raise ValueError("Model name not supported.")
-
+        
+        return models
    
     def run(self):
         while True:
@@ -70,38 +76,33 @@ class Anything(object):
                 path = input("File path: ")
                 self.delete(path)
             
-            elif input_text == "semantic_search":
+            elif input_text == "search":
+                data_type = input("Search images or texts? Type 'image' or 'text': ")
                 input_text = input("Search text: ")
-                self.semantic_search(input_text)
-            
-            elif input_text == "bm25_search":
-                input_text = input("Search text: ")
-                self.bm25_search(input_text)
-            
-            elif input_text == "exact_search":
-                input_text = input("Search text: ")
-                self.exact_search(input_text)
+                results = self.semantic_search(data_type, input_text)
+                print(results)
 
             else:
                 print("Invalid instruction.")
 
 
     def insert(self, path):
-        file_list = list_files_with_type(path)
+        file_list = list_files(path)
         for file in file_list:
             file_path = file['path']
-            file_type = file['type']
-            db = self.dbs[file_type]
-            type_indices = self.indices[file_type]
+            suffix = file['suffix']
+            data_type = file['type']
+            db = self.dbs[data_type]
+            type_indices = self.indices[data_type]
 
-            if (file_type in SUPPORTED_FILE_TYPE) and (file_path not in db.get_existing_file_paths()):
+            if file_path not in db.get_existing_file_paths(data_type):
                 
                 print("Processing file: ", file_path)
 
-                line_list = process_file(file_path, file_type, self.model)
-                inserted_ids = db.insert_data(line_list)
+                data_list = process_file(file_path, suffix, self.models[data_type])
+                inserted_ids = db.insert_data(data_list, data_type)
                 for _, index in type_indices.items():
-                    index.insert_index(line_list, inserted_ids)
+                    index.insert_index(data_list, inserted_ids)
 
 
     # def delete(self, path):
@@ -112,36 +113,30 @@ class Anything(object):
     #     self.bm25_index.rebuild_index(remaining_embeddings, remaining_ids)
     #     self.exact_macth_index.rebuild_index(remaining_embeddings, remaining_ids)
 
+
     def semantic_search(self, data_type, input_text):
-
-        query_embedding = encode_text(self.models["file"], input_text)
+        if data_type == "text":
+            encode_func = encode_text
+        else:
+            encode_func = encode_image
+        print(self.models[data_type], input_text)
+        query_embedding = encode_func(self.models[data_type], input_text)
+        print(query_embedding)
         data_idxs, distances = self.indices[data_type]["semantic"].search_index(query_embedding)
-        columns, results = self.dbs[data_type].retrieve_data(data_idxs)
-        
-        return self._process_output(distances, columns, results)
+        column_names, results = self.dbs[data_type].retrieve_data(data_type, data_idxs)
+        if data_type == "text":
+            return self._process_text_results(distances, column_names, results)
+        elif data_type == "image":
+            return self._process_image_results(distances, column_names, results)
     
 
-    def bm25_search(self, data_type, input_text):
-        data_idxs, distances = self.indices[data_type]["bm25"].search_index(input_text)
-        columns, results = self.dbs[data_type].retrieve_data(data_idxs)
-        
-        return self._process_output(distances, columns, results)
-    
-
-    def exact_search(self, data_type, input_text):
-        data_idxs, distances = self.indices[data_type]["exact"].search_index(input_text)
-        columns, results = self.dbs[data_type].retrieve_data(data_idxs)
-
-        return self._process_output(distances, columns, results)
-    
-
-    def _process_output(self, distances, columns, raw_results):
+    def _process_text_results(self, distances, column_names, raw_results):
         dict_list = []
         for distance, raw_result in zip(distances, raw_results):
             d = {}
             d['distance'] = distance
-            for column, result in zip(columns, raw_result):
-                d[column] = result
+            for column_name, result in zip(column_names, raw_result):
+                d[column_name] = result
             
             dict_list.append(d)
 
@@ -165,7 +160,18 @@ class Anything(object):
 
         sorted_list = sorted(combined_dict.items(), key=lambda x: x[1]["min_distance"])  
 
-        return sorted_list 
+        return sorted_list
+
+    def _process_image_results(self, distances, column_names, raw_results):
+
+        combined_dict = {}
+        for dist, raw_result in zip(distances, raw_results):
+            for d, column_name in zip(raw_result, column_names):
+                if column_name == "file_path":
+                    combined_dict[d] = dist
+        
+        sorted_list = sorted(combined_dict.items(), key=lambda x: x[1])
+        return sorted_list
     
     def close(self):
         for db in self.dbs.values():

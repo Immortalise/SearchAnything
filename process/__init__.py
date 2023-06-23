@@ -6,23 +6,32 @@ from .docparser import WordParser
 from .pptparser import PPTXParser
 from .mdparser import MDParser
 from .txtparser import TXTParser
+from .imgparser import ImgParser
 
-parsers: List[BaseParser] = [PDFParser, WordParser, PPTXParser, MDParser, TXTParser]
+from config import IMAGE_TYPES
+
+import nltk
+nltk.download("punkt")
 
 
-def _get_parser(file_type: str) -> BaseParser:
+parsers: List[BaseParser] = [PDFParser, WordParser, PPTXParser, MDParser, TXTParser, ImgParser]
+
+
+def _get_parser(suffix: str) -> BaseParser:
     for parser in parsers:
-        if parser.type.lower() == file_type.lower():
+        if parser.type.lower() == suffix.lower():
             return parser
     return None
 
 
-def process_file(file_path: str, file_type: Any, model: Any):
+def process_file(file_path: str, suffix: Any, model: Any):
     fpath = Path(file_path)
-    ftype = file_type if file_type is not None else fpath.suffix.strip('.')
+    suffix = suffix if suffix is not None else fpath.suffix.strip('.')
+    if suffix in IMAGE_TYPES:
+        suffix = "image"
     
-    parser = _get_parser(ftype)
+    parser = _get_parser(suffix)
     if not parser:
-        return None
+        raise NotImplementedError("Suffix of file is not supported.")
     
     return parser(file_path, model, None).parse()

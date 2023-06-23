@@ -1,20 +1,126 @@
-import sqlite3  
-import numpy as np
-import os
-
-from config import DB_PATH
-
 import sqlite3
+import numpy as np
+from config import DB_PATH, DATA_TYPES
 
 
-class DataBase(object):
-    def __init__(self) -> None:
+class Base_DB(object):
 
+    def __init__(self, sql) -> None:
+        self.db_path = DB_PATH
         conn = sqlite3.connect(DB_PATH)
 
         c = conn.cursor()
-        c.execute('''
-        CREATE TABLE IF NOT EXISTS file_data (
+        c.execute(sql)
+        conn.commit()
+        conn.close()
+
+    def insert_data(self, data_list, data_type):
+        
+        assert data_type in DATA_TYPES
+
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+
+        inserted_ids = []
+
+        for data in data_list:
+            
+            data['embedding'] = data['embedding'].tobytes()
+
+            columns = ', '.join(data.keys())
+            placeholders = ', '.join(['?' for _ in data])
+            values = tuple(data.values())
+        
+            query = f'INSERT INTO {data_type}_data ({columns}) VALUES ({placeholders})'
+
+            c.execute(query, values)
+        
+            conn.commit()
+
+            last_inserted_id = c.lastrowid  
+            inserted_ids.append(last_inserted_id)
+
+            data['embedding'] = np.frombuffer(data['embedding'], dtype=np.float32)
+
+        conn.close()
+
+        return inserted_ids
+
+    def delete_data(self, path, data_type, is_directory=False):
+        assert data_type in DATA_TYPES
+
+        conn = sqlite3.connect(self.db_path)
+        
+        c = conn.cursor()
+    
+        if is_directory:
+            if not path.endswith('/'):
+                path = path + '/'
+            query = f'DELETE FROM {data_type}_data WHERE file_path LIKE ?'
+            match_value = path + '%'
+        else:
+            query = f'DELETE FROM {data_type}_data WHERE file_path=?'
+            match_value = path
+    
+        c.execute(query, (match_value,))
+        
+        conn.commit()
+    
+        c.execute(f'SELECT id, embedding FROM {data_type}_data')
+        remaining_data = c.fetchall()
+    
+        remaining_ids = [row[0] for row in remaining_data]
+        remaining_embeddings = [np.frombuffer(row[1], dtype=np.float32) for row in remaining_data]
+        conn.close()
+    
+        return remaining_embeddings, remaining_ids  
+
+    def get_existing_file_paths(self, data_type):
+        
+        assert data_type in DATA_TYPES
+
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+    
+        c.execute(f'SELECT file_path FROM {data_type}_data')
+        file_paths = c.fetchall()
+    
+        file_path_set = set(file_path[0] for file_path in file_paths)
+        conn.close()
+    
+        return file_path_set   
+
+    def retrieve_data(self, data_type, indices=None, query=None):
+        
+        assert data_type in DATA_TYPES
+
+        conn = sqlite3.connect(self.db_path)  
+        c = conn.cursor()  
+  
+        if query:  
+            c.execute(query)  
+        else:  
+            indices = indices.tolist()  
+            placeholders = ','.join('?' * len(indices))  
+            query = f'SELECT * FROM {data_type}_data WHERE id IN ({placeholders})'  
+            c.execute(query, tuple(indices))  
+  
+        rows = c.fetchall()  
+        column_names = [desc[0] for desc in c.description]  
+  
+        conn.close()  
+  
+        return column_names, rows  
+
+    def close(self):
+        pass
+
+
+class Text_DB(Base_DB):
+    def __init__(self) -> None:
+
+        sql = '''
+        CREATE TABLE IF NOT EXISTS text_data (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT,
             author TEXT,
@@ -24,120 +130,19 @@ class DataBase(object):
             content TEXT,
             embedding BLOB
         )
-        ''')
-        conn.commit()
-        conn.close()
+        '''
+        super().__init__(sql)
 
 
-    def insert_data(self, line_list):
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
+class Image_DB(Base_DB):
+    def __init__(self) -> None:
+        sql = '''
+        CREATE TABLE IF NOT EXISTS image_data (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            file_path TEXT,
+            content TEXT,
+            embedding BLOB
+        )
+        '''
 
-        inserted_ids = []
-
-        for line in line_list:
-            
-            line['embedding'] = line['embedding'].tobytes()
-
-            columns = ', '.join(line.keys())
-            placeholders = ', '.join(['?' for _ in line])
-            values = tuple(line.values())
-        
-            query = f'INSERT INTO file_data ({columns}) VALUES ({placeholders})'
-
-            c.execute(query, values)
-        
-            conn.commit()
-
-            last_inserted_id = c.lastrowid  
-            inserted_ids.append(last_inserted_id)
-
-            line['embedding'] = np.frombuffer(line['embedding'], dtype=np.float32)
-
-        conn.close()
-
-        return inserted_ids
-
-
-    def delete_data(self, path, is_directory=False):  
-        # Get the cursor object to execute SQL queries
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-    
-        if is_directory:
-            # Make sure the path ends with a path separator
-            if not path.endswith('/'):
-                path = path + '/'
-            query = f'DELETE FROM file_data WHERE file_path LIKE ?'
-            match_value = path + '%'
-        else:
-            query = f'DELETE FROM file_data WHERE file_path=?'
-            match_value = path
-    
-        # Execute the query and delete rows with a matching path or directory prefix
-        c.execute(query, (match_value,))
-        
-        # Commit the transaction to the database
-        conn.commit()
-    
-        # Retrieve the remaining data embeddings and IDs
-        c.execute('SELECT id, embedding FROM file_data')
-        remaining_data = c.fetchall()
-    
-        # Extract the remaining embeddings and IDs
-        remaining_ids = [row[0] for row in remaining_data]
-        remaining_embeddings = [np.frombuffer(row[1], dtype=np.float32) for row in remaining_data]
-        conn.close()
-    
-        return remaining_embeddings, remaining_ids  
-
-  
-    def get_existing_file_paths(self):  
-        # Connect to the SQLite database
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-    
-        # Fetch all file paths from the table  
-        c.execute('SELECT file_path FROM file_data')  
-        file_paths = c.fetchall()  
-    
-        file_path_set = set(file_path[0] for file_path in file_paths)
-        conn.close() 
-    
-        return file_path_set   
-
-
-    def retrieve_data(self, indices):
-        indices = indices.tolist()
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        placeholders = ','.join('?' * len(indices))
-        query = f'SELECT * FROM file_data WHERE id IN ({placeholders})'
-        c.execute(query, tuple(indices))
-        rows = c.fetchall()
-        column_names = [desc[0] for desc in c.description]
-        # print(column_names)
-
-        # for i, row in enumerate(rows):
-        #     print(f"Result {i+1}:")
-
-        #     for name, value in zip(column_names, row):
-        #         if name in ['title', 'file_path', 'page', 'author', 'subject', 'content']:
-        #             print(f"{name}: {value}")
-            
-        #     print('\n')
-        conn.close()
-
-        return column_names, rows
-
-    def retrieve_data_custom_query(self, query):
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        c.execute(query)
-        rows = c.fetchall()
-        column_names = [desc[0] for desc in c.description]
-        conn.close()
-        return column_names, rows
-
-    def close(self):
-        pass
+        super().__init__(sql)

@@ -2,7 +2,7 @@ import os
 import streamlit as st  
 import tkinter as tk
 from tkinter import filedialog
-from search import Anything
+from anything import Anything
 
 st.set_page_config(layout="wide")
 

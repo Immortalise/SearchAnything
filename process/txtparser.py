@@ -4,15 +4,13 @@ from collections import defaultdict
 import sys
 import os
 import re
-import nltk
+
 from nltk.tokenize import sent_tokenize
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from .parser_base import BaseParser
 from utils import encode_text
-
-nltk.download("punkt")
 
 
 class TXTParser(BaseParser):

@@ -17,11 +17,11 @@ class BaseParser:
     def parse(self) -> List[Dict]:
         raise NotImplementedError()
 
-    def _to_sentences(self) -> List[Any]:
-        """
-        Parse file to sentences
-        """
-        raise NotImplementedError()
+    # def _to_sentences(self) -> List[Any]:
+    #     """
+    #     Parse file to sentences
+    #     """
+    #     raise NotImplementedError()
     
     def _check_format(self) -> bool:
         """
