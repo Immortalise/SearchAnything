@@ -20,7 +20,6 @@ def check_for_updates():
 def update_and_restart():  
     try:  
         subprocess.check_call(["git", "pull"])
-  
         os.execv(sys.executable, [sys.executable] + sys.argv)
     except Exception as e:
         print(f"Update error: {str(e)}")

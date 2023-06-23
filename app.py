@@ -2,13 +2,13 @@ import os
 import streamlit as st  
 import tkinter as tk
 from tkinter import filedialog
-from filegpt import FileGPT
+from search import Anything
 
 st.set_page_config(layout="wide")
 
 @st.cache_resource()  
 def create_filegpt_instance():  
-    return FileGPT("sentence-transformers/all-mpnet-base-v2")
+    return Anything("sentence-transformers/all-mpnet-base-v2")
 
 
 def search_database(query, search_types): 

@@ -8,17 +8,20 @@ from process import process_file
 from index import SemanticIndex, BM25Index, ExactMatchIndex
 
 
-class FileGPT(object):
-    def __init__(self):
+class Anything(object):
+    def __init__(self, models=None):
+
+        if models is None:
+            models = ["sentence-transformers/all-mpnet-base-v2", "clip-ViT-B-32"]
 
         if not os.path.exists(DATA_DIR):
-            os.makedirs(DATA_DIR)
-                  
-        self.models = self.load_models(["sentence-transformers/all-mpnet-base-v2", "clip-ViT-B-32"])
-        self.indices = self.load_indices()
+            os.makedirs(DATA_DIR)  
+        
         self.dbs = self.load_dbs()
+        self.models = self.load_models(models)
+        self.indices = self.load_indices()
 
-        print("FileGPT v0.2.0")
+        print("Anything v0.2.0")
         print("Type 'exit' to exit.\n\
               Type 'insert' to parse file.\n\
               Type 'search' to search file.\n\
@@ -175,8 +178,8 @@ class FileGPT(object):
 
 
 if __name__ == "__main__":
-    filegpt = FileGPT()
-    filegpt.run()
+    Anything = Anything()
+    Anything.run()
 
 
 
