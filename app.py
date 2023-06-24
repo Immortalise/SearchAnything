@@ -58,13 +58,8 @@ if app_choice == "Anything":
         if search_type == "text":
             for col, (results_type, results) in zip(cols, search_results.items()):
                 col.write(results_type)
-                
-                for file_path, file_info in results:
-                    expander = col.expander(f"{file_path} - Min distance: {file_info['min_distance']:.3f}")
-            
-                    for content, distance, page in zip(file_info["content"], file_info["distance"], file_info["page"]):
-                        expander.write(f"Page: {page}, Distance: {distance:.3f}")
-                        expander.write(f"Content: {content}")
+                for file_path, content, dist in results:
+                    st.write(file_path, content, dist)
         
         elif search_type == "image":
             for col, (results_type, results) in zip(cols, search_results.items()):

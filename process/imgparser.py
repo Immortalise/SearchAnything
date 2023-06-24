@@ -26,6 +26,7 @@ class ImgParser(BaseParser):
         file_dict = {}
         file_dict['content'] = None
         file_dict['embedding'] = encode_image(self.model, img)
+        print("embedding: ", type(file_dict['embedding']), file_dict['embedding'].shape)
         file_dict['file_path'] = self.file_path
             
         self.parse_output.append(file_dict)

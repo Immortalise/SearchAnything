@@ -1,7 +1,7 @@
 import os
 from sentence_transformers import SentenceTransformer
 
-from config import DATA_DIR, TEXT_EMBEDDING_MODELS, IMAGE_EMBEDDING_MODELS
+from config import DATA_DIR, DB_PATH, TEXT_EMBEDDING_MODELS, IMAGE_EMBEDDING_MODELS
 from database import Text_DB, Image_DB
 from utils import encode_text, encode_image, list_files
 from process import process_file
@@ -19,7 +19,8 @@ class Anything(object):
         
         self.dbs = self.load_dbs()
         self.models = self.load_models(default_models)
-        self.indices = self.load_indices()
+        # self.indices = self.load_indices()
+        self.index = self.load_index()
 
         
 
@@ -32,18 +33,24 @@ class Anything(object):
     def load_dbs(self):
         return {"text": Text_DB(), "image": Image_DB()}
 
-    def load_indices(self):
-        indices = {}
 
-        for data_type in self.dbs.keys():
-            if data_type == "text":
-                type_indices = {"semantic": SemanticIndex(dim=768, data_type=data_type)}
-            elif data_type == "image":
-                type_indices = {"semantic": SemanticIndex(dim=512, data_type=data_type)}
+    def load_index(self):
+        index = {"semantic": SemanticIndex(DB_PATH)}     
+        return index
+
+
+    # def load_indices(self):
+    #     indices = {}
+
+    #     for data_type in self.dbs.keys():
+    #         if data_type == "text":
+    #             type_indices = {"semantic": SemanticIndex(dim=768, data_type=data_type)}
+    #         elif data_type == "image":
+    #             type_indices = {"semantic": SemanticIndex(dim=512, data_type=data_type)}
             
-            indices[data_type] = type_indices
+    #         indices[data_type] = type_indices
         
-        return indices
+    #     return indices
 
 
     def load_models(self, model_names):
@@ -93,16 +100,18 @@ class Anything(object):
             suffix = file['suffix']
             data_type = file['type']
             db = self.dbs[data_type]
-            type_indices = self.indices[data_type]
+            # type_indices = self.indices[data_type]
 
             if file_path not in db.get_existing_file_paths(data_type):
                 
-                print("Processing file: ", file_path)
-
+                print("Processing file: ", file_path, suffix, self.models[data_type])
+                
                 data_list = process_file(file_path, suffix, self.models[data_type])
                 inserted_ids = db.insert_data(data_list, data_type)
-                for _, index in type_indices.items():
-                    index.insert_index(data_list, inserted_ids)
+                # print(data_list)
+                # print(inserted_ids)
+                # for _, index in type_indices.items():
+                #     index.insert_index(data_list, inserted_ids)
 
 
     # def delete(self, path):
@@ -119,15 +128,24 @@ class Anything(object):
             encode_func = encode_text
         else:
             encode_func = encode_image
+
         print(self.models[data_type], input_text)
+
         query_embedding = encode_func(self.models[data_type], input_text)
-        print(query_embedding)
-        data_idxs, distances = self.indices[data_type]["semantic"].search_index(query_embedding)
-        column_names, results = self.dbs[data_type].retrieve_data(data_type, data_idxs)
-        if data_type == "text":
-            return self._process_text_results(distances, column_names, results)
-        elif data_type == "image":
-            return self._process_image_results(distances, column_names, results)
+
+        print("query embed: ", type(query_embedding), query_embedding.shape)
+
+        results = self.index["semantic"].search_index(query_embedding, data_type)
+        return results
+
+
+
+        # data_idxs, distances = self.indices[data_type]["semantic"].search_index(query_embedding)
+        # column_names, results = self.dbs[data_type].retrieve_data(data_type, data_idxs)
+        # if data_type == "text":
+        #     return self._process_text_results(distances, column_names, results)
+        # elif data_type == "image":
+        #     return self._process_image_results(distances, column_names, results)
     
 
     def _process_text_results(self, distances, column_names, raw_results):
@@ -177,9 +195,9 @@ class Anything(object):
         for db in self.dbs.values():
             db.close()
         
-        for type_indices in self.indices.values():
-            for index in type_indices.values():
-                index.close()
+        # for type_indices in self.indices.values():
+        #     for index in type_indices.values():
+        #         index.close()
 
 
 

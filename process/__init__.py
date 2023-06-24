@@ -31,6 +31,7 @@ def process_file(file_path: str, suffix: Any, model: Any):
         suffix = "image"
     
     parser = _get_parser(suffix)
+    print(parser)
     if not parser:
         raise NotImplementedError("Suffix of file is not supported.")
     

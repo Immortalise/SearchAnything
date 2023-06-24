@@ -4,6 +4,7 @@ import subprocess
 import requests
 import re
 from pathlib import Path
+import numpy as np
 
 from config import __version__, TEXT_TYPES, IMAGE_TYPES
 
@@ -80,7 +81,7 @@ def parse_data_type(suffix):
 
 
 def list_files(root_path):
-    result = []
+    results = []
     root_path = Path(root_path)
     
     if root_path.is_file():
@@ -93,15 +94,14 @@ def list_files(root_path):
         data_type = parse_data_type(suffix)
         
         if data_type != "N/A":
-            result.append({"path": str(path), "suffix": suffix, "type": data_type})
+            results.append({"path": str(path), "suffix": suffix, "type": data_type})
     
-    return result
+    return results
 
 
 def encode_text(model, input_text):
     embedding = model.encode(input_text)
 
-    import numpy as np
     embedding_l2 = np.linalg.norm(embedding)
     embedding = embedding / embedding_l2
 
@@ -111,7 +111,6 @@ def encode_text(model, input_text):
 def encode_image(model, input_image):
     embedding = model.encode(input_image)
 
-    import numpy as np
     embedding_l2 = np.linalg.norm(embedding)
     embedding = embedding / embedding_l2
 
