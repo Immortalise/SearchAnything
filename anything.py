@@ -23,7 +23,7 @@ class Anything(object):
 
         
 
-        print("Anything v1.0")
+        print("SearchAnything v1.0")
         print("Type 'exit' to exit.\n\
               Type 'insert' to parse file.\n\
               Type 'search' to search file.\n\
