@@ -4,23 +4,9 @@
 
 Check out our demo video to see how it works.
 
-
-
-
-
 https://github.com/Immortalise/SearchAnything/assets/31989262/c7c2a3cf-154e-4249-a568-b769b6bc6308
 
-
-
 https://github.com/Immortalise/SearchAnything/assets/31989262/c59ae640-3b26-4e04-9fd1-0759a2bd2c84
-
-
-
-
-
-
-
-
 
 ## Installation
 
@@ -34,8 +20,6 @@ Use the following commands to set up the environment for "SearchAnything":
 conda env create -f env.yaml
 conda activate anything
 ```
-
-
 
 ## Running
 
@@ -59,8 +43,6 @@ Instruction:
 
 Type `insert`, followed by the file path. Please note that the file path can either be a single file or a directory. If a directory is specified, all supported files in the directory will be parsed and saved to the database.
 
-
-
 ### Search Files
 
 When searching files, you can also use a more user-friendly web interface by running:
@@ -71,16 +53,12 @@ streamlit run app.py
 
 In this local web interface, you can search files based on their semantic meanings.
 
-
-
 ## Supported File Types
 
 We currently support the following file types:
 
 - Text: pdf, txt, md
 - Image: jpg, jpeg, png
-
-
 
 ## Implementation
 
@@ -100,8 +78,6 @@ After generating the embedding for each image and text, we save the embedding al
 
 When given a query and a search type, we process the query into an embedding $e_q$, then retrieve all embeddings $[e_1, e_2, ..., e_n]$ from the database. We then calculate the cosine similarity between the query embedding `e_q` and each of $[e_1, e_2, ..., e_n]$, sort them in descending order, and return the results.
 
-
-
 ## TODOs
 
 We're eager to hear your valuable feedback and constructive suggestions!
@@ -110,11 +86,11 @@ Here are some features we plan to implement in the future:
 
 ### Functions
 
--  Support for deleting files.
--  Autonomous monitoring of file changes and automatic add/delete files into database when files are added/deleted.
--  Support for semantic search of audio resources.
+- [ ] Support for deleting files.
+- [ ] Autonomous monitoring of file changes and automatic add/delete files into database when files are added/deleted.
+- [ ] Support for semantic search of audio resources.
 
 ### Text Semantic Search
 
--  Support for .pptx and .docx formats.
--  Integration with BM25 and Exact search.
+- [ ] Support for .pptx and .docx formats.
+- [ ] Integration with BM25 and Exact search.
