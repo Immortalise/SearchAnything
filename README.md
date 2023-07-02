@@ -4,7 +4,21 @@
 
 Check out our demo video to see how it works.
 
-<video src="demo/Anything_Demo.mov"></video>
+
+
+
+
+https://github.com/Immortalise/SearchAnything/assets/31989262/c7c2a3cf-154e-4249-a568-b769b6bc6308
+
+
+
+https://github.com/Immortalise/SearchAnything/assets/31989262/c59ae640-3b26-4e04-9fd1-0759a2bd2c84
+
+
+
+
+
+
 
 
 
