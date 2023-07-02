@@ -1,6 +1,6 @@
-# Anything
+# SearchAnything
 
-"Anything" is a local semantic search engine, powered by various AI models, which allows you to search sentences and images based on their semantic meanings.
+"SearchAnything" is a local semantic search engine, powered by various AI models, which allows you to search sentences and images based on their semantic meanings.
 
 Check out our demo video to see how it works.
 
@@ -10,11 +10,11 @@ Check out our demo video to see how it works.
 
 ## Installation
 
-First, clone our repository: `git clone git@github.com:Immortalise/Anything.git`
+First, clone our repository: `git clone git@github.com:Immortalise/SearchAnything.git`
 
 We recommend using a Conda environment to manage your Python dependencies as it allows you to isolate your Python environment.
 
-Use the following commands to set up the environment for "Anything":
+Use the following commands to set up the environment for "SearchAnything":
 
 ```bash
 conda env create -f env.yaml
@@ -36,7 +36,7 @@ Upon running, you will see the following instructions:
 [nltk_data] Package punkt is already up-to-date! 
 Adding text embedding model 
 Adding image embedding model 
-Anything v1.0 Type 'exit' to exit.   
+SearchAnything v1.0 Type 'exit' to exit.   
 Type 'insert' to parse file.   
 Type 'search' to search file.   
 Type 'delete' to delete file. 
@@ -70,7 +70,7 @@ We currently support the following file types:
 
 ## Implementation
 
-"Anything" primarily involves two steps:
+"SearchAnything" primarily involves two steps:
 
 ### Embedding
 
