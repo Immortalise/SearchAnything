@@ -21,6 +21,9 @@ conda env create -f env.yaml
 conda activate anything
 ```
 
+Please note that on MacOS systems, executing `conda env create -f env.yaml` may result in errors due to the CUDA packages and some other packages. We are currently addressing this issue and working on improving the MacOS environment compatibility.
+
+
 ## Running
 
 ### Adding Files
