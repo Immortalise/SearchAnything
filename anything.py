@@ -19,7 +19,6 @@ class Anything(object):
         
         self.dbs = self.load_dbs()
         self.models = self.load_models(default_models)
-        # self.indices = self.load_indices()
         self.index = self.load_index()
 
         
@@ -37,21 +36,6 @@ class Anything(object):
     def load_index(self):
         index = {"semantic": SemanticIndex(DB_PATH)}     
         return index
-
-
-    # def load_indices(self):
-    #     indices = {}
-
-    #     for data_type in self.dbs.keys():
-    #         if data_type == "text":
-    #             type_indices = {"semantic": SemanticIndex(dim=768, data_type=data_type)}
-    #         elif data_type == "image":
-    #             type_indices = {"semantic": SemanticIndex(dim=512, data_type=data_type)}
-            
-    #         indices[data_type] = type_indices
-        
-    #     return indices
-
 
     def load_models(self, model_names):
         models = {}
@@ -100,27 +84,13 @@ class Anything(object):
             suffix = file['suffix']
             data_type = file['type']
             db = self.dbs[data_type]
-            # type_indices = self.indices[data_type]
 
             if file_path not in db.get_existing_file_paths(data_type):
                 
                 print("Processing file: ", file_path, suffix, self.models[data_type])
                 
                 data_list = process_file(file_path, suffix, self.models[data_type])
-                inserted_ids = db.insert_data(data_list, data_type)
-                # print(data_list)
-                # print(inserted_ids)
-                # for _, index in type_indices.items():
-                #     index.insert_index(data_list, inserted_ids)
-
-
-    # def delete(self, path):
-    #     is_dir = os.path.isdir(path)
-        
-    #     remaining_embeddings, remaining_ids = self.db.delete_data(path, is_directory=is_dir)
-    #     self.index.rebuild_index(remaining_embeddings, remaining_ids)
-    #     self.bm25_index.rebuild_index(remaining_embeddings, remaining_ids)
-    #     self.exact_macth_index.rebuild_index(remaining_embeddings, remaining_ids)
+                db.insert_data(data_list, data_type)
 
 
     def semantic_search(self, data_type, input_text):
@@ -129,11 +99,7 @@ class Anything(object):
         else:
             encode_func = encode_image
 
-        print(self.models[data_type], input_text)
-
         query_embedding = encode_func(self.models[data_type], input_text)
-
-        print("query embed: ", type(query_embedding), query_embedding.shape)
 
         results = self.index["semantic"].search_index(query_embedding, data_type)
         return results

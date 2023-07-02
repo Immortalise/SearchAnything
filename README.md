@@ -1,51 +1,104 @@
 # Anything
 
-Anything is a local semantic search engine powered by different AI models.
+"Anything" is a local semantic search engine, powered by various AI models, which allows you to search sentences and images based on their semantic meanings.
 
-Currently, we support search words (including pdfs, txt, and markdown formats) and images (including jpg, jpeg, png formats) by their semantic meanings.
+Check out our demo video to see how it works.
 
-See the video for an example.
 
 
 ## Installation
 
-It is better to have a conda environment, conda allows you to split your python environment.
+First, clone our repository: `git clone git@github.com:Immortalise/Anything.git`
 
-Follow the instruction below to create the environment for Anything:
+We recommend using a Conda environment to manage your Python dependencies as it allows you to isolate your Python environment.
+
+Use the following commands to set up the environment for "Anything":
 
 ```bash
-conda create -n anything python=3.8
+conda env create -f env.yaml
 conda activate anything
-pip install -r requirements.txt
 ```
+
+
 
 ## Running
 
-You can running a user-friendly web interface.
+### Adding Files
 
-```bash
+Start the application by running `python anything.py` in the console.
+
+Upon running, you will see the following instructions:
+
+```
+[nltk_data] Downloading package punkt to /home/haoc/nltk_data... 
+[nltk_data] Package punkt is already up-to-date! 
+Adding text embedding model 
+Adding image embedding model 
+Anything v1.0 Type 'exit' to exit.   
+Type 'insert' to parse file.   
+Type 'search' to search file.   
+Type 'delete' to delete file. 
+Instruction:
+```
+
+Type `insert`, followed by the file path. Please note that the file path can either be a single file or a directory. If a directory is specified, all supported files in the directory will be parsed and saved to the database.
+
+
+
+### Search Files
+
+When searching files, you can also use a more user-friendly web interface by running:
+
+```
 streamlit run app.py
 ```
 
-In this local website, you can
+In this local web interface, you can search files based on their semantic meanings.
 
-* add your files
-* search files by their semantic meanings
+
+
+## Supported File Types
+
+We currently support the following file types:
+
+- Text: pdf, txt, md
+- Image: jpg, jpeg, png
+
+
 
 ## Implementation
 
-The main AI models are based on sentence-transformer [repository](https://github.com/UKPLab/sentence-transformers).
+"Anything" primarily involves two steps:
+
+### Embedding
+
+Given a text or images, they are first processed into a vector (embedding). The main AI models for semantic search are based on the sentence-transformer [repository](https://github.com/UKPLab/sentence-transformers).
 
 Semantic search for text: `all-mpnet-base-v2`
 
-Semantic search for image: `clip-ViT-B-32`
+Semantic search for images: `clip-ViT-B-32`
+
+### Save and Retrieve
+
+After generating the embedding for each image and text, we save the embedding along with the file path into a database.
+
+When given a query and a search type, we process the query into an embedding $e_q$, then retrieve all embeddings $[e_1, e_2, ..., e_n]$ from the database. We then calculate the cosine similarity between the query embedding `e_q` and each of $[e_1, e_2, ..., e_n]$, sort them in descending order, and return the results.
+
+
 
 ## TODOs
 
-We look forward to your precious opinions and constructive suggestions!
+We're eager to hear your valuable feedback and constructive suggestions!
 
-Currently, we will try our best to implement these functions:
+Here are some features we plan to implement in the future:
 
-* [ ] For text semantic search, supports .pptx .docx format.
-* [ ] Monitor the file changes.
-* [ ] Supports semantic search for audio resources.
+### Functions
+
+-  Support for deleting files.
+-  Autonomous monitoring of file changes and automatic add/delete files into database when files are added/deleted.
+-  Support for semantic search of audio resources.
+
+### Text Semantic Search
+
+-  Support for .pptx and .docx formats.
+-  Integration with BM25 and Exact search.

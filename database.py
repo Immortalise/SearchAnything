@@ -44,7 +44,6 @@ class Base_DB(object):
 
         conn.close()
 
-        return inserted_ids
 
     def delete_data(self, path, data_type, is_directory=False):
         assert data_type in DATA_TYPES
