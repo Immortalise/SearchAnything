@@ -4,6 +4,8 @@
 
 Check out our demo video to see how it works.
 
+<video src="demo/Anything_Demo.mov"></video>
+
 
 
 ## Installation

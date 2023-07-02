@@ -1,4 +1,0 @@
-The drawbacks of AT:
-overfit
-can't solve frog OOD
-time-consuming
