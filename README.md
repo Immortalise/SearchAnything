@@ -102,3 +102,13 @@ Here are some features we plan to implement in the future:
 
 - [ ] Support for .pptx and .docx formats.
 - [ ] Integration with BM25 and Exact search.
+
+
+## Authors
+
+* **Kaijie Zhu** - CASIA - [Immortalise](https://github.com/Immortalise)
+* **Wenxin Hou** - STCA - [houwenxin](https://github.com/houwenxin)
+* **Chuqi Zhang** - NUS - [Icegrave0391](https://github.com/Icegrave0391)
+* **Jindong Wang** - MSRA - [jindongwang](https://github.com/jindongwang)
+
+Jindong is the leader of this project.
