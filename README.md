@@ -1,4 +1,5 @@
-![WechatIMG5114](https://github.com/Immortalise/SearchAnything/assets/31989262/38f2dafe-9746-4510-89f3-ea5037325086)
+
+![search_anything](https://github.com/Immortalise/SearchAnything/assets/31989262/47cbde20-8280-4537-8bfc-83317f28ce35)
 
 
 # SearchAnything
@@ -7,13 +8,19 @@
 
 Check out our demo video to see how it works.
 
-https://github.com/Immortalise/SearchAnything/assets/31989262/c7c2a3cf-154e-4249-a568-b769b6bc6308
 
-https://github.com/Immortalise/SearchAnything/assets/31989262/c59ae640-3b26-4e04-9fd1-0759a2bd2c84
+https://github.com/Immortalise/SearchAnything/assets/31989262/76ab3ad4-1f57-453f-acfc-dea7a310ae1d
 
 
-![pipeline](https://github.com/Immortalise/SearchAnything/assets/31989262/404688ca-6cb7-4f58-9559-74f7f1c5b71b)
 
+https://github.com/Immortalise/SearchAnything/assets/31989262/8a7e0234-a35f-4cd8-936b-ea1ae9e0089a
+
+
+
+
+
+
+![pipeline](https://github.com/Immortalise/SearchAnything/assets/31989262/7705eec1-e6c7-426e-9095-f49df355ad4f)
 
 
 ## Installation
