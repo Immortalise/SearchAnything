@@ -95,6 +95,8 @@ Here are some features we plan to implement in the future:
 ### Functions
 
 - [ ] Support for deleting files.
+- [ ] Support audio input.
+- [ ] Support image query.
 - [ ] Autonomous monitoring of file changes and automatic add/delete files into database when files are added/deleted.
 - [ ] Support for semantic search of audio resources.
 
@@ -110,5 +112,3 @@ Here are some features we plan to implement in the future:
 * **Wenxin Hou** - STCA - [houwenxin](https://github.com/houwenxin)
 * **Chuqi Zhang** - NUS - [Icegrave0391](https://github.com/Icegrave0391)
 * **Jindong Wang** - MSRA - [jindongwang](https://github.com/jindongwang)
-
-Jindong is the leader of this project.
