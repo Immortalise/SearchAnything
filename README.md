@@ -11,6 +11,11 @@ https://github.com/Immortalise/SearchAnything/assets/31989262/c7c2a3cf-154e-4249
 
 https://github.com/Immortalise/SearchAnything/assets/31989262/c59ae640-3b26-4e04-9fd1-0759a2bd2c84
 
+
+![pipeline](https://github.com/Immortalise/SearchAnything/assets/31989262/404688ca-6cb7-4f58-9559-74f7f1c5b71b)
+
+
+
 ## Installation
 
 First, clone our repository: `git clone git@github.com:Immortalise/SearchAnything.git`
