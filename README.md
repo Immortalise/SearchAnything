@@ -1,6 +1,4 @@
-
-![search_anything](https://github.com/Immortalise/SearchAnything/assets/31989262/47cbde20-8280-4537-8bfc-83317f28ce35)
-
+![search_anything](https://github.com/Immortalise/SearchAnything/assets/31989262/2ba3edd0-ae34-44ed-862d-c1f0eced29d3)
 
 # SearchAnything
 
