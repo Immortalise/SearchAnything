@@ -81,6 +81,11 @@ After generating the embedding for each image and text, we save the embedding al
 
 When given a query and a search type, we process the query into an embedding $e_q$, then retrieve all embeddings $[e_1, e_2, ..., e_n]$ from the database. We then calculate the cosine similarity between the query embedding `e_q` and each of $[e_1, e_2, ..., e_n]$, sort them in descending order, and return the results.
 
+### Privacy Protection
+
+SearchAnything downloads the most advanced AI models to run locally, so there's no need to worry about your private data being compromised!
+Text semantic search only requires about 400MB of memory space, while image semantic search requires around 4GB of memory. We will add more models in the future to make it easier for users with different memory sizes to use.
+
 ## TODOs
 
 We're eager to hear your valuable feedback and constructive suggestions!
