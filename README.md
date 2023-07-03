@@ -33,7 +33,7 @@ Start the application by running `python anything.py` in the console.
 Upon running, you will see the following instructions:
 
 ```
-[nltk_data] Downloading package punkt to /home/haoc/nltk_data... 
+[nltk_data] Downloading package punkt to /xxx/nltk_data... 
 [nltk_data] Package punkt is already up-to-date! 
 Adding text embedding model 
 Adding image embedding model 
