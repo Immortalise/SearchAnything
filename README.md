@@ -1,3 +1,6 @@
+![WechatIMG5114](https://github.com/Immortalise/SearchAnything/assets/31989262/38f2dafe-9746-4510-89f3-ea5037325086)
+
+
 # SearchAnything
 
 "SearchAnything" is a local semantic search engine, powered by various AI models, which allows you to search sentences and images based on their semantic meanings.
@@ -99,11 +102,22 @@ Here are some features we plan to implement in the future:
 - [ ] Support image query.
 - [ ] Autonomous monitoring of file changes and automatic add/delete files into database when files are added/deleted.
 - [ ] Support for semantic search of audio resources.
+- [ ] Test ImageBind model.
 
 ### Text Semantic Search
 
 - [ ] Support for .pptx and .docx formats.
 - [ ] Integration with BM25 and Exact search.
+
+
+## Related work
+
+Note the recent Github library: [Semantra](https://github.com/freedmand/semantra) is similar to our SearchAnything and aims to facilitate semantic search of documents. SearchAnything differs from Semantra in the following ways:
+
+* flexible file support: SearchAnything supports not only text files (PDF, TXT, MD), but also images (e.g. JPG, JPEG, PNG). We are constantly working on expanding the range of supported file types.
+* Integration of different AI models: SearchAnything integrates different AI models based on the Sentence Transformer library. This approach ensures a powerful and versatile semantic understanding of a wide range of data.
+* User-friendly interface: SearchAnything is equipped with a native interface provided by Streamlit, which is designed to be very friendly for non-technical users.
+
 
 
 ## Authors
@@ -112,3 +126,9 @@ Here are some features we plan to implement in the future:
 * **Wenxin Hou** - STCA - [houwenxin](https://github.com/houwenxin)
 * **Chuqi Zhang** - NUS - [Icegrave0391](https://github.com/Icegrave0391)
 * **Jindong Wang** - MSRA - [jindongwang](https://github.com/jindongwang)
+
+
+## Acknowledgements
+
+* [Sentence Transformers: Multilingual Sentence, Paragraph, and Image Embeddings using BERT & Co.](https://github.com/UKPLab/sentence-transformers)
+* [SQLite3](https://www.sqlite.org/docs.html)
