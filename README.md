@@ -1,4 +1,4 @@
-![search_anything](https://github.com/Immortalise/SearchAnything/assets/31989262/2ba3edd0-ae34-44ed-862d-c1f0eced29d3)
+<img src="https://github.com/Immortalise/SearchAnything/assets/31989262/2ba3edd0-ae34-44ed-862d-c1f0eced29d3" width="400" height="160">
 
 # SearchAnything
 
@@ -136,6 +136,7 @@ Note the recent Github library: [Semantra](https://github.com/freedmand/semantra
 * **Wenxin Hou** - STCA - [houwenxin](https://github.com/houwenxin)
 * **Chuqi Zhang** - NUS - [Icegrave0391](https://github.com/Icegrave0391)
 * **Jindong Wang** - MSRA - [jindongwang](https://github.com/jindongwang)
+* **Yidong Wang** --PKU -[qianlanwyd](https://github.com/qianlanwyd)
 
 
 ## Acknowledgements
