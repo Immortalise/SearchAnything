@@ -113,6 +113,7 @@ Here are some features we plan to implement in the future:
 - [ ] Autonomous monitoring of file changes and automatic add/delete files into database when files are added/deleted.
 - [ ] Support for semantic search of audio resources.
 - [ ] Test ImageBind model.
+- [ ] Support for MacOS system.
 
 ### Text Semantic Search
 
@@ -136,7 +137,7 @@ Note the recent Github library: [Semantra](https://github.com/freedmand/semantra
 * **Wenxin Hou** - STCA - [houwenxin](https://github.com/houwenxin)
 * **Chuqi Zhang** - NUS - [Icegrave0391](https://github.com/Icegrave0391)
 * **Jindong Wang** - MSRA - [jindongwang](https://github.com/jindongwang)
-* **Yidong Wang** --PKU -[qianlanwyd](https://github.com/qianlanwyd)
+* **Yidong Wang** -PKU - [qianlanwyd](https://github.com/qianlanwyd)
 
 
 ## Acknowledgements
