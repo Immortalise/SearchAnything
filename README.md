@@ -6,12 +6,9 @@
 
 Check out our demo video to see how it works.
 
+https://github.com/Immortalise/SearchAnything/assets/31989262/76ab3ad4-1f57-453f-acfc-dea7a310ae1d
 
-![image_demo4](https://github.com/Immortalise/SearchAnything/assets/31989262/6f105428-b32d-4c0b-abe9-dc552019d653)
-
-![text_demo3](https://github.com/Immortalise/SearchAnything/assets/31989262/65775c69-a1eb-4c5b-8716-8a0cd120721a)
-
-
+https://github.com/Immortalise/SearchAnything/assets/31989262/8a7e0234-a35f-4cd8-936b-ea1ae9e0089a
 
 
 
