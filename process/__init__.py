@@ -22,7 +22,19 @@ def _get_parser(suffix: str) -> BaseParser:
         if parser.type.lower() == suffix.lower():
             return parser
     return None
-
+    
+def get_valid_file_suffixes():
+    suffixes = []
+    suffixes.extend(IMAGE_TYPES)
+    for parser in parsers:
+        suffixes.append(parser.type.lower())
+    return suffixes
+    
+def is_valid_image(suffix: Any):
+    if suffix in IMAGE_TYPES:
+        return True
+    else:
+        return False
 
 def process_file(file_path: str, suffix: Any, model: Any):
     fpath = Path(file_path)
@@ -31,7 +43,7 @@ def process_file(file_path: str, suffix: Any, model: Any):
         suffix = "image"
     
     parser = _get_parser(suffix)
-    print(parser)
+    # print(parser)
     if not parser:
         raise NotImplementedError("Suffix of file is not supported.")
     
