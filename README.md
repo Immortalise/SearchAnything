@@ -2,6 +2,8 @@
 
 # SearchAnything
 
+[UPD] This repository is no longer actively maintained. We encourage and appreciate all efforts to improve SearchAnything.
+
 "SearchAnything" is a local semantic search engine, powered by various AI models, which allows you to search sentences and images based on their semantic meanings.
 
 Check out our demo video to see how it works. [[Zhihu blog](https://zhuanlan.zhihu.com/p/641128049)] [[Twitter](https://twitter.com/jd92wang/status/1676114619168067585)]
