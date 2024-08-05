@@ -52,7 +52,7 @@ class MDParser(BaseParser):
             self.parse_output = None
             return []
 
-        with open(self.file_path, 'r', encoding='utf-8') as f:
+        with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
             raw_content = f.read()
 
         html_content = markdown.markdown(raw_content)  

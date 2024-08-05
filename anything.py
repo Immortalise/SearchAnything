@@ -1,12 +1,15 @@
 import os
+import keyboard
+import numpy
+from PIL import Image
 from sentence_transformers import SentenceTransformer
 
 from config import DATA_DIR, DB_PATH, TEXT_EMBEDDING_MODELS, IMAGE_EMBEDDING_MODELS
 from database import Text_DB, Image_DB
-from utils import encode_text, encode_image, list_files
-from process import process_file
+from utils import encode_text, encode_image, list_files, verify_file
+from process import process_file, is_valid_image
 from index import SemanticIndex
-
+from tools.search4files import Search4files
 
 class Anything(object):
     def __init__(self, models=None):
@@ -26,6 +29,8 @@ class Anything(object):
         print("SearchAnything v1.0")
         print("Type 'exit' to exit.\n\
               Type 'insert' to parse file.\n\
+              Type 'insert_all' to search for ALL available files on your local drives and then parse.\n\
+                   -Press 'q' to quit searching. \n\
               Type 'search' to search file.\n\
               Type 'delete' to delete file.")
         
@@ -62,6 +67,9 @@ class Anything(object):
             elif input_text == "insert":
                 path = input("File path: ")
                 self.insert(path)
+                
+            elif input_text == "insert_all":
+                self.insert_all()
 
             elif input_text == "delete":
                 path = input("File path: ")
@@ -75,7 +83,6 @@ class Anything(object):
 
             else:
                 print("Invalid instruction.")
-
 
     def insert(self, path):
         file_list = list_files(path)
@@ -92,6 +99,50 @@ class Anything(object):
                 data_list = process_file(file_path, suffix, self.models[data_type])
                 db.insert_data(data_list, data_type)
 
+    def insert_all(self):
+        search4files = Search4files()
+        files_walking = False
+        while True:
+            # Get 1 file
+            path = search4files.search()
+            if (path is None):
+                if (files_walking == False):
+                    print("None file found. ")
+                else:
+                    print("All files found have been processed. Done! ")
+                return
+            files_walking = True
+
+            file = verify_file(path)
+            if (file is None):
+                continue
+            file_path = file['path']
+            suffix = file['suffix']
+            data_type = file['type']
+            db = self.dbs[data_type]
+
+            if is_valid_image(suffix):
+                # A workaround for a bug in Sentence-Transformers to avoid unexpected Exceptions
+                try:
+                    im = Image.open(file_path)
+                    dimension = numpy.array(im).shape
+                    skip_size = (1, 3)
+                    if (dimension[0] in skip_size):
+                        # Sentence-Transformers would get confused on images with these sizes, skip them
+                        continue
+                except:
+                    # Skip image file errors
+                    continue
+
+            if file_path not in db.get_existing_file_paths(data_type):
+                #print("Processing file: ", file_path, suffix, self.models[data_type])
+                
+                data_list = process_file(file_path, suffix, self.models[data_type])
+                db.insert_data(data_list, data_type)
+
+            if (keyboard.is_pressed("q") or keyboard.is_pressed("Q")):
+                print("Files processing quit. ")
+                return
 
     def semantic_search(self, data_type, input_text):
         if data_type == "text":

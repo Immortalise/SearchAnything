@@ -98,6 +98,20 @@ def list_files(root_path):
     
     return results
 
+# Retrieve a single file's information instead of for files in a folder
+# An alternative version of above function 'list_files'
+def verify_file(file_path):
+    results = None
+    file_path = Path(file_path)
+    
+    suffix = file_path.suffix[1:]
+    data_type = parse_data_type(suffix)
+    
+    if data_type != "N/A":
+        results = {"path": str(file_path), "suffix": suffix, "type": data_type}
+    
+    return results
+    
 
 def encode_text(model, input_text):
     embedding = model.encode(input_text)

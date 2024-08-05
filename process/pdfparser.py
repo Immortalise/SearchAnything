@@ -50,6 +50,11 @@ class PDFParser(BaseParser):
             return []
 
         pdf_doc: fitz.Document = fitz.open(self.file_path)
+        if (pdf_doc.needs_pass):
+            # If PDF is password proteced, skip
+            pdf_doc.close()
+            self.parse_output = None
+            return []
         
         raw_text: str = ""
         page_text: List(int, str) = []

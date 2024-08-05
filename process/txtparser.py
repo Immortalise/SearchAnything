@@ -50,7 +50,8 @@ class TXTParser(BaseParser):
             self.parse_output = None
             return []
 
-        with open(self.file_path, 'r', encoding='utf-8') as f:
+        # Ignore errors from opening 'utf-16' files
+        with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
             raw_text = f.read()
 
         # remove hyphens 

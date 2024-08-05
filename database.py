@@ -16,6 +16,9 @@ class Base_DB(object):
 
     def insert_data(self, data_list, data_type):
         
+        if data_list is None:
+            return
+
         assert data_type in DATA_TYPES
 
         conn = sqlite3.connect(self.db_path)
